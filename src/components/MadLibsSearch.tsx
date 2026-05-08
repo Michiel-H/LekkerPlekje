@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { GEZELSCHAP_TAGS, VIBE_TAGS } from "@/lib/tags";
 
 const STAD_OPTIONS = [
-  { slug: "amsterdam", name: "Amsterdam", emoji: "🏙️", live: true },
-  { slug: "utrecht", name: "Utrecht", emoji: "🏛️", live: false },
-  { slug: "rotterdam", name: "Rotterdam", emoji: "🌉", live: false },
-  { slug: "den-haag", name: "Den Haag", emoji: "⚖️", live: false },
-  { slug: "eindhoven", name: "Eindhoven", emoji: "💡", live: false },
+  { slug: "amsterdam", name: "Amsterdam", live: true },
+  { slug: "utrecht", name: "Utrecht", live: false },
+  { slug: "rotterdam", name: "Rotterdam", live: false },
+  { slug: "den-haag", name: "Den Haag", live: false },
+  { slug: "eindhoven", name: "Eindhoven", live: false },
 ];
 
 type Slot = "vibe" | "gezelschap" | "stad" | null;
@@ -60,7 +60,7 @@ export default function MadLibsSearch() {
           className={slotClass(vibe)}
         >
           {vibe
-            ? `${getVibeLabel(vibe)?.emoji} ${getVibeLabel(vibe)?.name}`
+            ? getVibeLabel(vibe)?.name
             : "activiteit?"}
         </button>{" "}
         met{" "}
@@ -69,7 +69,7 @@ export default function MadLibsSearch() {
           className={slotClass(gezelschap)}
         >
           {gezelschap
-            ? `${getGezelschapLabel(gezelschap)?.emoji} ${getGezelschapLabel(gezelschap)?.name}`
+            ? getGezelschapLabel(gezelschap)?.name
             : "gezelschap?"}
         </button>{" "}
         in{" "}
@@ -78,7 +78,7 @@ export default function MadLibsSearch() {
           className={slotClass(stad)}
         >
           {stad
-            ? `${getStadLabel(stad)?.emoji} ${getStadLabel(stad)?.name}`
+            ? getStadLabel(stad)?.name
             : "stad?"}
         </button>
       </p>
@@ -110,7 +110,6 @@ export default function MadLibsSearch() {
                       : "bg-white text-espresso border border-espresso/10 hover:border-groen hover:text-groen"
                 }`}
               >
-                <span>{option.emoji}</span>
                 <span>{option.name}</span>
                 {isComingSoon && (
                   <span className="text-xs opacity-50">soon</span>
@@ -127,7 +126,7 @@ export default function MadLibsSearch() {
             onClick={handleSearch}
             className="inline-flex items-center gap-2 rounded-full bg-spritz px-8 py-3 text-base font-semibold text-white hover:bg-spritz-hover transition-colors shadow-lg shadow-spritz/25"
           >
-            Zoek plekjes 🍊
+            Zoek plekjes
           </button>
         </div>
       )}

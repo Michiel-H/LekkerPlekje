@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           <div>
             <Link href="/" className="flex items-center gap-2">
-              <span className="text-xl">🍊</span>
+              <span className="text-xl font-display font-bold text-spritz">LP</span>
               <span className="font-display text-lg font-semibold text-espresso">
                 LekkerPlekje
               </span>
@@ -73,7 +73,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 border-t border-espresso/10 pt-6 text-center text-xs text-espresso-light">
-          &copy; {new Date().getFullYear()} LekkerPlekje.nl — Met 🍊 gemaakt in
+          &copy; {new Date().getFullYear()} LekkerPlekje.nl — Gemaakt in
           Amsterdam
         </div>
       </div>

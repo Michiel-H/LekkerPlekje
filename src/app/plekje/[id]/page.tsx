@@ -17,7 +17,6 @@ export default async function PlekjeDetailPage({ params }: Props) {
       <>
         <Header />
         <main className="flex-1 px-4 py-16 text-center">
-          <p className="text-6xl mb-4">🍊</p>
           <h1 className="font-display text-2xl font-bold text-espresso">
             Plekje niet gevonden
           </h1>
@@ -57,8 +56,8 @@ export default async function PlekjeDetailPage({ params }: Props) {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-6xl">
-                🍊
+              <div className="w-full h-full flex items-center justify-center text-lg font-display font-semibold text-groen/40">
+                Geen afbeelding
               </div>
             )}
           </div>
@@ -83,7 +82,7 @@ export default async function PlekjeDetailPage({ params }: Props) {
               </span>
               {plekje.scoutTitle && (
                 <span className="text-sm text-spritz/70">
-                  🏅 {plekje.scoutTitle}
+                  {plekje.scoutTitle}
                 </span>
               )}
             </div>
@@ -101,7 +100,6 @@ export default async function PlekjeDetailPage({ params }: Props) {
                   className="flex items-center justify-between rounded-xl bg-white border border-espresso/8 p-4"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-xl">{tag.emoji}</span>
                     <span className="font-medium text-espresso">
                       {tag.name}
                     </span>

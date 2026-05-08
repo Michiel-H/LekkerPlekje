@@ -25,7 +25,6 @@ export default function RegistrerenPage() {
       <main className="flex-1 px-4 py-12 sm:py-16">
         <div className="mx-auto max-w-sm">
           <div className="text-center mb-8">
-            <p className="text-4xl mb-3">🍊</p>
             <h1 className="font-display text-2xl font-bold text-espresso">
               Word lid
             </h1>
@@ -85,9 +84,9 @@ export default function RegistrerenPage() {
               <div className="flex gap-2">
                 {(
                   [
-                    { value: "vent", label: "Lekker ventje", emoji: "🧔" },
-                    { value: "griet", label: "Lekker grietje", emoji: "👩" },
-                    { value: "neutraal", label: "Toppertje", emoji: "⭐" },
+                    { value: "vent", label: "Lekker ventje" },
+                    { value: "griet", label: "Lekker grietje" },
+                    { value: "neutraal", label: "Toppertje" },
                   ] as const
                 ).map((option) => (
                   <button
@@ -100,9 +99,6 @@ export default function RegistrerenPage() {
                         : "border-espresso/10 text-espresso-light hover:border-espresso/20"
                     }`}
                   >
-                    <span className="block text-lg mb-0.5">
-                      {option.emoji}
-                    </span>
                     {option.label}
                   </button>
                 ))}

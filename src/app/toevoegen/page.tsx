@@ -48,7 +48,6 @@ export default function ToevoegenPage() {
       <>
         <Header />
         <main className="flex-1 px-4 py-16 text-center">
-          <p className="text-6xl mb-4">🍊</p>
           <h1 className="font-display text-2xl font-bold text-espresso">
             Bedankt voor je tip!
           </h1>
@@ -81,7 +80,7 @@ export default function ToevoegenPage() {
       <main className="flex-1 px-4 py-8 sm:py-12">
         <div className="mx-auto max-w-2xl">
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-espresso">
-            Plekje toevoegen 🍊
+            Plekje toevoegen
           </h1>
           <p className="mt-2 text-espresso-light">
             Ken je een lekker plekje? Deel het met de rest! Kies de tags die
@@ -153,7 +152,7 @@ export default function ToevoegenPage() {
                             : "bg-white border border-espresso/10 text-espresso hover:border-groen hover:text-groen"
                         }`}
                       >
-                        {tag.emoji} {tag.name}
+                        {tag.name}
                       </button>
                     );
                   })}
@@ -165,7 +164,7 @@ export default function ToevoegenPage() {
                 ).map((tag) => (
                   <div key={`mot-${tag.slug}`} className="mt-3 ml-2">
                     <label className="block text-xs font-medium text-espresso-light mb-1">
-                      Waarom {tag.emoji} {tag.name}?
+                      Waarom {tag.name}?
                     </label>
                     <input
                       type="text"

@@ -11,7 +11,7 @@ export default function Header() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl">🍊</span>
+            <span className="text-2xl font-display font-bold text-spritz">LP</span>
             <span className="font-display text-xl font-semibold text-espresso">
               LekkerPlekje
             </span>

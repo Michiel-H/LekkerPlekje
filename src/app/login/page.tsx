@@ -21,7 +21,6 @@ export default function LoginPage() {
       <main className="flex-1 px-4 py-12 sm:py-16">
         <div className="mx-auto max-w-sm">
           <div className="text-center mb-8">
-            <p className="text-4xl mb-3">🍊</p>
             <h1 className="font-display text-2xl font-bold text-espresso">
               Welkom terug
             </h1>

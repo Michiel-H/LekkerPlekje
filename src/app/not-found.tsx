@@ -7,7 +7,6 @@ export default function NotFound() {
     <>
       <Header />
       <main className="flex-1 px-4 py-16 text-center">
-        <p className="text-6xl mb-4">🍊</p>
         <h1 className="font-display text-3xl font-bold text-espresso">
           Oeps, verkeerd plekje!
         </h1>

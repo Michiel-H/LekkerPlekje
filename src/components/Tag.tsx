@@ -34,7 +34,6 @@ export default function Tag({
 
   return (
     <button className={`${base} ${variants[variant]} ${className}`} {...props}>
-      <span>{emoji}</span>
       <span>{label}</span>
       {count !== undefined && (
         <span className="ml-0.5 text-xs opacity-70">{count}</span>

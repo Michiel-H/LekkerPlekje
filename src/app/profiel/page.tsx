@@ -34,8 +34,8 @@ export default function ProfielPage() {
         <div className="mx-auto max-w-4xl">
           {/* Profile header */}
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-16 h-16 rounded-full bg-spritz/10 flex items-center justify-center text-2xl">
-              🍊
+            <div className="w-16 h-16 rounded-full bg-spritz/10 flex items-center justify-center text-2xl font-display font-bold text-spritz">
+              {user.displayName.charAt(0)}
             </div>
             <div>
               <h1 className="font-display text-2xl font-bold text-espresso">
@@ -44,7 +44,7 @@ export default function ProfielPage() {
               <div className="flex items-center gap-2 mt-1">
                 {user.role === "scout" ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-spritz/10 px-3 py-1 text-sm font-medium text-spritz">
-                    🏅 {titleMap[user.pronoun]}
+                    {titleMap[user.pronoun]}
                   </span>
                 ) : (
                   <span className="text-sm text-espresso-light">
@@ -96,7 +96,6 @@ export default function ProfielPage() {
             </div>
           ) : (
             <div className="rounded-xl bg-white border border-espresso/8 p-8 text-center">
-              <p className="text-4xl mb-3">🍊</p>
               <p className="text-espresso-light">
                 Je hebt nog geen plekjes getipt. Begin met je eerste!
               </p>

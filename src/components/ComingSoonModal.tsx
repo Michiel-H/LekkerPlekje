@@ -28,7 +28,6 @@ export default function ComingSoonModal({
     <Modal open={open} onClose={onClose}>
       {submitted ? (
         <div className="text-center py-4">
-          <p className="text-4xl mb-3">🍊</p>
           <h2 className="font-display text-xl font-semibold text-espresso">
             Genoteerd!
           </h2>
@@ -39,7 +38,7 @@ export default function ComingSoonModal({
       ) : (
         <>
           <h2 className="font-display text-xl font-semibold text-espresso">
-            {city} komt eraan! 🍊
+            {city} komt eraan!
           </h2>
           <p className="mt-2 text-sm text-espresso-light">
             We zijn druk bezig met de lekkerste plekjes van {city}. Laat je

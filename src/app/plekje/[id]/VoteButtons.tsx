@@ -41,7 +41,7 @@ export default function VoteButtons({ tagName }: VoteButtonsProps) {
         }`}
         aria-label={`${tagName} is lekker`}
       >
-        👍 {upCount}
+        Lekker {upCount}
       </button>
       <button
         onClick={() => handleVote("down")}
@@ -52,7 +52,7 @@ export default function VoteButtons({ tagName }: VoteButtonsProps) {
         }`}
         aria-label={`${tagName} is niet zo lekker`}
       >
-        👎 {downCount}
+        Niet lekker {downCount}
       </button>
     </div>
   );

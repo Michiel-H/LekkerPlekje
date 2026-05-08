@@ -9,7 +9,7 @@ export default function HoeHetWerktPage() {
       <main className="flex-1 px-4 py-12 sm:py-16">
         <div className="mx-auto max-w-2xl">
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-espresso text-center">
-            Hoe werkt LekkerPlekje? 🍊
+            Hoe werkt LekkerPlekje?
           </h1>
           <p className="mt-4 text-lg text-espresso-light text-center">
             Geen sterren. Geen lange recensies. Gewoon eerlijke tips van echte
@@ -20,8 +20,8 @@ export default function HoeHetWerktPage() {
             {/* 1. Zoeken */}
             <section>
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-spritz/10 flex items-center justify-center text-xl shrink-0">
-                  🔍
+                <div className="w-10 h-10 rounded-xl bg-spritz/10 flex items-center justify-center text-sm font-bold text-spritz shrink-0">
+                  1
                 </div>
                 <div>
                   <h2 className="font-display text-xl font-semibold text-espresso">
@@ -42,8 +42,8 @@ export default function HoeHetWerktPage() {
             {/* 2. Tags */}
             <section>
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-groen/10 flex items-center justify-center text-xl shrink-0">
-                  🏷️
+                <div className="w-10 h-10 rounded-xl bg-groen/10 flex items-center justify-center text-sm font-bold text-groen shrink-0">
+                  2
                 </div>
                 <div>
                   <h2 className="font-display text-xl font-semibold text-espresso">
@@ -62,16 +62,16 @@ export default function HoeHetWerktPage() {
             {/* 3. Stemmen */}
             <section>
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-frisgroen/10 flex items-center justify-center text-xl shrink-0">
-                  👍
+                <div className="w-10 h-10 rounded-xl bg-frisgroen/10 flex items-center justify-center text-sm font-bold text-frisgroen shrink-0">
+                  3
                 </div>
                 <div>
                   <h2 className="font-display text-xl font-semibold text-espresso">
                     3. Stem op tags
                   </h2>
                   <p className="mt-2 text-espresso-light">
-                    Was die kroeg echt chill voor een date? 👍 Lekker. Was het
-                    eigenlijk niet zo gezellig met je ouders? 👎 Niet zo lekker.
+                    Was die kroeg echt chill voor een date? Lekker. Was het
+                    eigenlijk niet zo gezellig met je ouders? Niet zo lekker.
                     Tags met te veel negatieve stemmen verdwijnen vanzelf.
                   </p>
                 </div>
@@ -81,8 +81,8 @@ export default function HoeHetWerktPage() {
             {/* 4. Scout worden */}
             <section>
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-spritz/10 flex items-center justify-center text-xl shrink-0">
-                  🏅
+                <div className="w-10 h-10 rounded-xl bg-spritz/10 flex items-center justify-center text-sm font-bold text-spritz shrink-0">
+                  4
                 </div>
                 <div>
                   <h2 className="font-display text-xl font-semibold text-espresso">

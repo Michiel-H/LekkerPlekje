@@ -14,7 +14,7 @@ export default function Home() {
         <section className="px-4 pt-16 pb-12 sm:pt-24 sm:pb-16">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="font-display text-4xl sm:text-5xl font-bold text-espresso leading-tight">
-              Vind het lekkerste plekje 🍊
+              Vind het lekkerste plekje
             </h1>
             <p className="mt-4 text-lg text-espresso-light max-w-xl mx-auto">
               Geen sterren. Geen lange recensies. Gewoon goeie tips voor het
@@ -57,7 +57,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
                 <div className="mx-auto w-14 h-14 rounded-2xl bg-spritz/10 flex items-center justify-center text-2xl mb-4">
-                  🔍
+                  1
                 </div>
                 <h3 className="font-display text-lg font-semibold text-espresso">
                   Vertel wat je zoekt
@@ -70,20 +70,20 @@ export default function Home() {
 
               <div className="text-center">
                 <div className="mx-auto w-14 h-14 rounded-2xl bg-groen/10 flex items-center justify-center text-2xl mb-4">
-                  👍
+                  2
                 </div>
                 <h3 className="font-display text-lg font-semibold text-espresso">
                   Stem op tags
                 </h3>
                 <p className="mt-2 text-sm text-espresso-light">
-                  Lekker plekje voor een date? Stem 👍. Niet zo gezellig met je
-                  ouders? Stem 👎. Zo worden tips steeds beter.
+                  Lekker plekje voor een date? Stem Lekker. Niet zo gezellig met
+                  je ouders? Stem Niet lekker. Zo worden tips steeds beter.
                 </p>
               </div>
 
               <div className="text-center">
                 <div className="mx-auto w-14 h-14 rounded-2xl bg-frisgroen/10 flex items-center justify-center text-2xl mb-4">
-                  🏅
+                  3
                 </div>
                 <h3 className="font-display text-lg font-semibold text-espresso">
                   Word Scout

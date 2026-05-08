@@ -32,8 +32,8 @@ export default function PlekjeCard({
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-4xl">
-            🍊
+          <div className="w-full h-full flex items-center justify-center text-sm font-display font-semibold text-groen/40">
+            Geen afbeelding
           </div>
         )}
       </div>
@@ -53,7 +53,7 @@ export default function PlekjeCard({
                 key={tag.name}
                 className="inline-flex items-center gap-1 rounded-full bg-groen/10 px-2.5 py-1 text-xs font-medium text-groen"
               >
-                {tag.emoji} {tag.name}
+                {tag.name}
               </span>
             ))}
             {tags.length > 4 && (
@@ -67,7 +67,7 @@ export default function PlekjeCard({
         {scoutName && (
           <p className="mt-3 text-xs text-spritz font-medium">
             Ontdekt door: {scoutName}{" "}
-            {scoutTitle && <span className="opacity-70">🏅 {scoutTitle}</span>}
+            {scoutTitle && <span className="opacity-70">{scoutTitle}</span>}
           </p>
         )}
       </div>

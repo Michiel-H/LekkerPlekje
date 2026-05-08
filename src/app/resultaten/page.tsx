@@ -48,7 +48,7 @@ export default async function ResultatenPage({ searchParams }: Props) {
                     <span key={t.slug}>
                       {i > 0 && (i === tagDetails.length - 1 ? " en " : ", ")}
                       <span className="text-spritz">
-                        {t.emoji} {t.name}
+                        {t.name}
                       </span>
                     </span>
                   ))}
@@ -75,7 +75,7 @@ export default async function ResultatenPage({ searchParams }: Props) {
                   key={tag.slug}
                   className="inline-flex items-center gap-1.5 rounded-full bg-groen/10 px-3 py-1.5 text-sm font-medium text-groen"
                 >
-                  {tag.emoji} {tag.name}
+                  {tag.name}
                 </span>
               ))}
               <Link
