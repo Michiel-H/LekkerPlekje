@@ -26,26 +26,21 @@ export default function RegistrerenPage() {
     setLoading(true);
 
     try {
-      const { data, error: authError } = await supabase.auth.signUp({
+      const { error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            display_name: displayName,
+            pronoun,
+          },
+        },
       });
 
       if (authError) throw authError;
 
-      if (data.user) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: dbError } = await (supabase.from("users") as any).insert({
-          id: data.user.id,
-          display_name: displayName,
-          pronoun,
-        });
-
-        if (dbError) throw dbError;
-
-        router.push("/profiel");
-        router.refresh();
-      }
+      router.push("/profiel");
+      router.refresh();
     } catch (err: any) {
       setError(err.message || "Er is iets misgegaan tijdens het registreren.");
     } finally {
