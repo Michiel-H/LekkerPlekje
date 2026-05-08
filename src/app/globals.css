@@ -23,6 +23,15 @@ body {
   font-family: var(--font-body), system-ui, sans-serif;
 }
 
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 4px 20px rgba(255, 126, 103, 0.25); }
+  50% { box-shadow: 0 4px 30px rgba(255, 126, 103, 0.45); }
+}
+
+.animate-breathe {
+  animation: breathe 2.5s ease-in-out infinite;
+}
+
 h1, h2, h3, h4 {
   font-family: var(--font-display), Georgia, serif;
 }
