@@ -1,0 +1,205 @@
+"use client";
+
+import { useState } from "react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import Button from "@/components/Button";
+import { TAGS } from "@/lib/tags";
+import type { TagCategory } from "@/lib/supabase/types";
+
+export default function ToevoegenPage() {
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
+  const [selectedTags, setSelectedTags] = useState<
+    Record<string, string>
+  >({});
+  const [motivations, setMotivations] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
+
+  function toggleTag(slug: string) {
+    setSelectedTags((prev) => {
+      const next = { ...prev };
+      if (next[slug]) {
+        delete next[slug];
+        const m = { ...motivations };
+        delete m[slug];
+        setMotivations(m);
+      } else {
+        next[slug] = slug;
+      }
+      return next;
+    });
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    // TODO: submit to Supabase
+    setSubmitted(true);
+  }
+
+  const categories: { key: TagCategory; label: string }[] = [
+    { key: "gezelschap", label: "Voor wie?" },
+    { key: "vibe", label: "Wat voor vibe?" },
+    { key: "setting", label: "Welke setting?" },
+  ];
+
+  if (submitted) {
+    return (
+      <>
+        <Header />
+        <main className="flex-1 px-4 py-16 text-center">
+          <p className="text-6xl mb-4">🍊</p>
+          <h1 className="font-display text-2xl font-bold text-espresso">
+            Bedankt voor je tip!
+          </h1>
+          <p className="mt-2 text-espresso-light max-w-md mx-auto">
+            We checken je plekje en zetten het zo snel mogelijk live. Nog 5
+            goedgekeurde plekjes en je bent een Scout!
+          </p>
+          <Button
+            className="mt-6"
+            onClick={() => {
+              setSubmitted(false);
+              setName("");
+              setAddress("");
+              setNeighborhood("");
+              setSelectedTags({});
+              setMotivations({});
+            }}
+          >
+            Nog een plekje toevoegen
+          </Button>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Header />
+      <main className="flex-1 px-4 py-8 sm:py-12">
+        <div className="mx-auto max-w-2xl">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-espresso">
+            Plekje toevoegen 🍊
+          </h1>
+          <p className="mt-2 text-espresso-light">
+            Ken je een lekker plekje? Deel het met de rest! Kies de tags die
+            passen en schrijf er een korte motivatie bij.
+          </p>
+
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium text-espresso mb-1.5">
+                Naam van het plekje
+              </label>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="bijv. Café de Klos"
+                className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 focus:ring-spritz/50"
+              />
+            </div>
+
+            {/* Address */}
+            <div>
+              <label className="block text-sm font-medium text-espresso mb-1.5">
+                Adres
+              </label>
+              <input
+                type="text"
+                required
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="bijv. Kerkstraat 41, Amsterdam"
+                className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 focus:ring-spritz/50"
+              />
+            </div>
+
+            {/* Neighborhood */}
+            <div>
+              <label className="block text-sm font-medium text-espresso mb-1.5">
+                Buurt
+              </label>
+              <input
+                type="text"
+                value={neighborhood}
+                onChange={(e) => setNeighborhood(e.target.value)}
+                placeholder="bijv. Jordaan, De Pijp, Oost"
+                className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 focus:ring-spritz/50"
+              />
+            </div>
+
+            {/* Tags by category */}
+            {categories.map(({ key, label }) => (
+              <div key={key}>
+                <label className="block text-sm font-medium text-espresso mb-2">
+                  {label}
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {TAGS.filter((t) => t.category === key).map((tag) => {
+                    const isSelected = !!selectedTags[tag.slug];
+                    return (
+                      <button
+                        key={tag.slug}
+                        type="button"
+                        onClick={() => toggleTag(tag.slug)}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium transition-all ${
+                          isSelected
+                            ? "bg-groen text-white"
+                            : "bg-white border border-espresso/10 text-espresso hover:border-groen hover:text-groen"
+                        }`}
+                      >
+                        {tag.emoji} {tag.name}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Motivations for selected tags in this category */}
+                {TAGS.filter(
+                  (t) => t.category === key && selectedTags[t.slug]
+                ).map((tag) => (
+                  <div key={`mot-${tag.slug}`} className="mt-3 ml-2">
+                    <label className="block text-xs font-medium text-espresso-light mb-1">
+                      Waarom {tag.emoji} {tag.name}?
+                    </label>
+                    <input
+                      type="text"
+                      value={motivations[tag.slug] || ""}
+                      onChange={(e) =>
+                        setMotivations((prev) => ({
+                          ...prev,
+                          [tag.slug]: e.target.value,
+                        }))
+                      }
+                      placeholder="bijv. Hele gezellige binnentuin"
+                      className="w-full rounded-lg border border-espresso/10 bg-white px-3 py-2 text-sm text-espresso placeholder:text-espresso-light/40 focus:outline-none focus:ring-2 focus:ring-spritz/50"
+                    />
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            <div className="pt-2">
+              <Button
+                type="submit"
+                size="lg"
+                disabled={
+                  !name || !address || Object.keys(selectedTags).length === 0
+                }
+              >
+                Plekje insturen
+              </Button>
+            </div>
+          </form>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
