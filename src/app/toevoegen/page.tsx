@@ -39,9 +39,8 @@ export default function ToevoegenPage() {
   }
 
   const categories: { key: TagCategory; label: string }[] = [
-    { key: "gezelschap", label: "Voor wie?" },
-    { key: "vibe", label: "Wat voor vibe?" },
-    { key: "setting", label: "Welke setting?" },
+    { key: "vibe", label: "Wat ga je doen?" },
+    { key: "gezelschap", label: "Met wie?" },
   ];
 
   if (submitted) {
