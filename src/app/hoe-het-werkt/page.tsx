@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, createContext, useContext } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
@@ -28,55 +28,32 @@ function useInView(threshold = 0.2) {
   return { ref, inView };
 }
 
-// --- Orchestrator: cycles through animations in order ---
-// Phase 0 = sentence (8s), Phase 1 = tags (7.5s), Phase 2 = thumbs (5s), then repeat
-type AnimationPhase = "sentence" | "tags" | "thumbs";
-const AnimationContext = createContext<AnimationPhase>("sentence");
+// Phase durations in ms
+const PHASE_DURATIONS = [8000, 7500, 5000] as const; // sentence, tags, thumbs
 
-const PHASE_ORDER: AnimationPhase[] = ["sentence", "tags", "thumbs"];
-const PHASE_DURATIONS: Record<AnimationPhase, number> = {
-  sentence: 8000,  // 4 steps × 2s
-  tags: 7500,      // 5 tags × 1.5s
-  thumbs: 5000,    // enough for 1-2 thumb pulses
-};
-
-function AnimationOrchestrator({ children }: { children: React.ReactNode }) {
-  const [phaseIndex, setPhaseIndex] = useState(0);
-
-  useEffect(() => {
-    const currentPhase = PHASE_ORDER[phaseIndex];
-    const duration = PHASE_DURATIONS[currentPhase];
-    const timer = setTimeout(() => {
-      setPhaseIndex((prev) => (prev + 1) % PHASE_ORDER.length);
-    }, duration);
-    return () => clearTimeout(timer);
-  }, [phaseIndex]);
-
-  return (
-    <AnimationContext.Provider value={PHASE_ORDER[phaseIndex]}>
-      {children}
-    </AnimationContext.Provider>
-  );
-}
-
-function AnimatedSentence() {
-  const activePhase = useContext(AnimationContext);
-  const isActive = activePhase === "sentence";
+function AnimatedSentence({ isActive }: { isActive: boolean }) {
   const [step, setStep] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const words = ["activiteit?", "Biertje doen", "gezelschap?", "Met vrienden", "stad?", "Amsterdam"];
 
   useEffect(() => {
-    if (!isActive) {
-      const resetTimer = setTimeout(() => setStep(0), 0);
-      return () => clearTimeout(resetTimer);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-    const interval = setInterval(() => {
-      setStep((prev) => {
-        if (prev >= 3) return 3;
-        return prev + 1;
-      });
-    }, 2000);
-    return () => clearInterval(interval);
+
+    if (isActive) {
+      setStep(0);
+      intervalRef.current = setInterval(() => {
+        setStep((prev) => (prev >= 3 ? 3 : prev + 1));
+      }, 2000);
+    } else {
+      setStep(0);
+    }
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [isActive]);
 
   const vibeText = step >= 1 ? words[1] : words[0];
@@ -126,41 +103,97 @@ function AnimatedSentence() {
   );
 }
 
-function ThumbAnimation() {
-  const activePhase = useContext(AnimationContext);
-  const isActive = activePhase === "thumbs";
-  const [pulseCount, setPulseCount] = useState(0);
+function TagDemo({ isActive }: { isActive: boolean }) {
+  const tags = ["Biertje doen", "Koffie", "Diner", "Terrasje pakken", "Date"];
+  const [activeTag, setActiveTag] = useState<number | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const counterRef = useRef(0);
 
   useEffect(() => {
-    if (!isActive) {
-      const resetTimer = setTimeout(() => setPulseCount(0), 0);
-      return () => clearTimeout(resetTimer);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-    // Pulse the "Lekker" button a few times when active
-    const interval = setInterval(() => {
-      setPulseCount((prev) => prev + 1);
-    }, 1200);
-    return () => clearInterval(interval);
+
+    if (isActive) {
+      counterRef.current = 0;
+      setActiveTag(0);
+      intervalRef.current = setInterval(() => {
+        counterRef.current += 1;
+        setActiveTag(counterRef.current % tags.length);
+      }, 1500);
+    } else {
+      setActiveTag(null);
+    }
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [isActive, tags.length]);
+
+  return (
+    <div className="mt-5 flex flex-wrap justify-center gap-2">
+      {tags.map((tag, i) => (
+        <span
+          key={tag}
+          className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 ${
+            activeTag === i
+              ? "bg-groen text-white scale-105 shadow-md shadow-groen/20"
+              : "bg-groen/10 text-groen"
+          }`}
+        >
+          {tag}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function ThumbAnimation({ isActive }: { isActive: boolean }) {
+  const [pulseCount, setPulseCount] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    if (isActive) {
+      setPulseCount(0);
+      intervalRef.current = setInterval(() => {
+        setPulseCount((prev) => prev + 1);
+      }, 1200);
+    } else {
+      setPulseCount(0);
+    }
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [isActive]);
 
-  const showPulse = isActive && pulseCount % 2 === 1;
+  const showLekker = isActive && pulseCount % 2 === 1;
+  const showNiet = isActive && pulseCount % 4 === 3;
 
   return (
     <div className="mt-5 flex items-center justify-center gap-3">
       <button
         className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
-          showPulse
+          showLekker
             ? "bg-frisgroen text-white scale-110 shadow-lg shadow-frisgroen/30"
             : "bg-frisgroen/10 text-frisgroen"
         }`}
       >
         Lekker
       </button>
-      <button className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
-        isActive && pulseCount % 4 === 3
-          ? "bg-koraal text-white scale-110 shadow-lg shadow-koraal/30"
-          : "bg-koraal/10 text-koraal"
-      }`}>
+      <button
+        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
+          showNiet
+            ? "bg-koraal text-white scale-110 shadow-lg shadow-koraal/30"
+            : "bg-koraal/10 text-koraal"
+        }`}
+      >
         Niet lekker
       </button>
     </div>
@@ -170,7 +203,6 @@ function ThumbAnimation() {
 const STEPS = [
   {
     number: "1",
-    color: "spritz",
     bgColor: "bg-spritz/10",
     textColor: "text-spritz",
     title: "Zoek op situatie",
@@ -180,7 +212,6 @@ const STEPS = [
   },
   {
     number: "2",
-    color: "groen",
     bgColor: "bg-groen/10",
     textColor: "text-groen",
     title: "Alles draait om tags",
@@ -190,7 +221,6 @@ const STEPS = [
   },
   {
     number: "3",
-    color: "frisgroen",
     bgColor: "bg-frisgroen/10",
     textColor: "text-frisgroen",
     title: "Stem op tags",
@@ -200,7 +230,6 @@ const STEPS = [
   },
   {
     number: "4",
-    color: "spritz",
     bgColor: "bg-spritz/10",
     textColor: "text-spritz",
     title: "Word Toppertje",
@@ -209,16 +238,33 @@ const STEPS = [
   },
 ];
 
-function StepCard({ step, index }: { step: (typeof STEPS)[number]; index: number }) {
+function Badge({ label }: { label: string }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <strong
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={`inline-block text-spritz cursor-default transition-all duration-200 ${
+        hovered ? "-translate-y-0.5 drop-shadow-sm" : ""
+      }`}
+    >
+      {label}
+    </strong>
+  );
+}
+
+function StepCard({
+  step,
+  index,
+  isAnimating,
+}: {
+  step: (typeof STEPS)[number];
+  index: number;
+  isAnimating: boolean;
+}) {
   const { ref, inView } = useInView(0.15);
   const [hovered, setHovered] = useState(false);
-  const activePhase = useContext(AnimationContext);
-
-  // Highlight the card when its animation is playing
-  const isAnimating =
-    (step.extra === "sentence" && activePhase === "sentence") ||
-    (step.extra === "tags" && activePhase === "tags") ||
-    (step.extra === "thumbs" && activePhase === "thumbs");
 
   return (
     <div
@@ -256,63 +302,9 @@ function StepCard({ step, index }: { step: (typeof STEPS)[number]; index: number
         </div>
       </div>
 
-      {step.extra === "sentence" && <AnimatedSentence />}
-      {step.extra === "tags" && <TagDemo />}
-      {step.extra === "thumbs" && <ThumbAnimation />}
-    </div>
-  );
-}
-
-function Badge({ label }: { label: string }) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <strong
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={`inline-block text-spritz cursor-default transition-all duration-200 ${
-        hovered ? "-translate-y-0.5 drop-shadow-sm" : ""
-      }`}
-    >
-      {label}
-    </strong>
-  );
-}
-
-function TagDemo() {
-  const tags = ["Biertje doen", "Koffie", "Diner", "Terrasje pakken", "Date"];
-  const activePhase = useContext(AnimationContext);
-  const isActive = activePhase === "tags";
-  const [activeTag, setActiveTag] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!isActive) {
-      const resetTimer = setTimeout(() => setActiveTag(null), 0);
-      return () => clearTimeout(resetTimer);
-    }
-    let i = 0;
-    const startTimer = setTimeout(() => setActiveTag(0), 0);
-    const interval = setInterval(() => {
-      i++;
-      setActiveTag(i % tags.length);
-    }, 1500);
-    return () => { clearTimeout(startTimer); clearInterval(interval); };
-  }, [isActive, tags.length]);
-
-  return (
-    <div className="mt-5 flex flex-wrap justify-center gap-2">
-      {tags.map((tag, i) => (
-        <span
-          key={tag}
-          className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 ${
-            activeTag === i
-              ? "bg-groen text-white scale-105 shadow-md shadow-groen/20"
-              : "bg-groen/10 text-groen"
-          }`}
-        >
-          {tag}
-        </span>
-      ))}
+      {step.extra === "sentence" && <AnimatedSentence isActive={isAnimating} />}
+      {step.extra === "tags" && <TagDemo isActive={isAnimating} />}
+      {step.extra === "thumbs" && <ThumbAnimation isActive={isAnimating} />}
     </div>
   );
 }
@@ -320,11 +312,32 @@ function TagDemo() {
 export default function HoeHetWerktPage() {
   const heroRef = useRef<HTMLDivElement>(null);
   const [heroVisible, setHeroVisible] = useState(false);
+  // 0 = sentence, 1 = tags, 2 = thumbs, cycles forever
+  const [activePhase, setActivePhase] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setHeroVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  // Orchestrator: cycle through phases sequentially
+  useEffect(() => {
+    const duration = PHASE_DURATIONS[activePhase];
+    const timer = setTimeout(() => {
+      setActivePhase((prev) => (prev + 1) % 3);
+    }, duration);
+    return () => clearTimeout(timer);
+  }, [activePhase]);
+
+  const getIsAnimating = useCallback(
+    (extra: string) => {
+      if (extra === "sentence") return activePhase === 0;
+      if (extra === "tags") return activePhase === 1;
+      if (extra === "thumbs") return activePhase === 2;
+      return false;
+    },
+    [activePhase]
+  );
 
   return (
     <>
@@ -348,13 +361,16 @@ export default function HoeHetWerktPage() {
           </div>
 
           {/* Steps — 2x2 grid on desktop, stacked on mobile */}
-          <AnimationOrchestrator>
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-5">
-              {STEPS.map((step, i) => (
-                <StepCard key={step.number} step={step} index={i} />
-              ))}
-            </div>
-          </AnimationOrchestrator>
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-5">
+            {STEPS.map((step, i) => (
+              <StepCard
+                key={step.number}
+                step={step}
+                index={i}
+                isAnimating={getIsAnimating(step.extra)}
+              />
+            ))}
+          </div>
 
           {/* Breathing CTA */}
           <div

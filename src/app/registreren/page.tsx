@@ -34,7 +34,8 @@ export default function RegistrerenPage() {
       if (authError) throw authError;
 
       if (data.user) {
-        const { error: dbError } = await supabase.from("users").insert({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: dbError } = await (supabase.from("users") as any).insert({
           id: data.user.id,
           display_name: displayName,
           pronoun,
