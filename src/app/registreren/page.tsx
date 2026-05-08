@@ -1,22 +1,55 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import Link from "next/link";
 
 export default function RegistrerenPage() {
+  const router = useRouter();
+  const supabase = createClient();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pronoun, setPronoun] = useState<"vent" | "griet" | "neutraal">(
     "neutraal"
   );
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: Supabase auth signUp + insert into users table
+    setError(null);
+    setLoading(true);
+
+    try {
+      const { data, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
+      if (data.user) {
+        const { error: dbError } = await supabase.from("users").insert({
+          id: data.user.id,
+          display_name: displayName,
+          pronoun,
+        });
+
+        if (dbError) throw dbError;
+
+        router.push("/profiel");
+        router.refresh();
+      }
+    } catch (err: any) {
+      setError(err.message || "Er is iets misgegaan tijdens het registreren.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -34,6 +67,12 @@ export default function RegistrerenPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 rounded-xl">
+                {error}
+              </div>
+            )}
+            
             <div>
               <label className="block text-sm font-medium text-espresso mb-1.5">
                 Naam
@@ -105,8 +144,8 @@ export default function RegistrerenPage() {
               </div>
             </div>
 
-            <Button type="submit" size="lg" className="w-full">
-              Account aanmaken
+            <Button type="submit" size="lg" className="w-full" disabled={loading}>
+              {loading ? "Bezig..." : "Account aanmaken"}
             </Button>
           </form>
 
