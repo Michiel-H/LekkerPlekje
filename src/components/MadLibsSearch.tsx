@@ -69,7 +69,7 @@ export default function MadLibsSearch() {
           className={slotClass(gezelschap)}
         >
           {gezelschap
-            ? getGezelschapLabel(gezelschap)?.name
+            ? getGezelschapLabel(gezelschap)?.name.replace(/^Met /i, "")
             : "gezelschap?"}
         </button>{" "}
         in{" "}
