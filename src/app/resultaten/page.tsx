@@ -6,14 +6,14 @@ import { TAGS } from "@/lib/tags";
 import Link from "next/link";
 
 interface Props {
-  searchParams: Promise<{ gezelschap?: string; vibe?: string; setting?: string }>;
+  searchParams: Promise<{ gezelschap?: string; vibe?: string; stad?: string }>;
 }
 
 export default async function ResultatenPage({ searchParams }: Props) {
   const params = await searchParams;
-  const { gezelschap, vibe, setting } = params;
+  const { gezelschap, vibe, stad } = params;
 
-  const selectedTags = [gezelschap, vibe, setting].filter(Boolean) as string[];
+  const selectedTags = [gezelschap, vibe].filter(Boolean) as string[];
   const tagDetails = selectedTags.map(
     (slug) => TAGS.find((t) => t.slug === slug)!
   ).filter(Boolean);
@@ -52,9 +52,14 @@ export default async function ResultatenPage({ searchParams }: Props) {
                       </span>
                     </span>
                   ))}
+                  {stad && (
+                    <span className="text-espresso">
+                      {" "}in {stad.charAt(0).toUpperCase() + stad.slice(1).replace("-", " ")}
+                    </span>
+                  )}
                 </>
               ) : (
-                "Alle plekjes in Amsterdam"
+                `Alle plekjes in ${stad ? stad.charAt(0).toUpperCase() + stad.slice(1).replace("-", " ") : "Amsterdam"}`
               )}
             </h1>
             <p className="mt-2 text-espresso-light">
