@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, createContext, useContext } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
@@ -28,16 +28,56 @@ function useInView(threshold = 0.2) {
   return { ref, inView };
 }
 
+// --- Orchestrator: cycles through animations in order ---
+// Phase 0 = sentence (8s), Phase 1 = tags (7.5s), Phase 2 = thumbs (5s), then repeat
+type AnimationPhase = "sentence" | "tags" | "thumbs";
+const AnimationContext = createContext<AnimationPhase>("sentence");
+
+const PHASE_ORDER: AnimationPhase[] = ["sentence", "tags", "thumbs"];
+const PHASE_DURATIONS: Record<AnimationPhase, number> = {
+  sentence: 8000,  // 4 steps × 2s
+  tags: 7500,      // 5 tags × 1.5s
+  thumbs: 5000,    // enough for 1-2 thumb pulses
+};
+
+function AnimationOrchestrator({ children }: { children: React.ReactNode }) {
+  const [phaseIndex, setPhaseIndex] = useState(0);
+
+  useEffect(() => {
+    const currentPhase = PHASE_ORDER[phaseIndex];
+    const duration = PHASE_DURATIONS[currentPhase];
+    const timer = setTimeout(() => {
+      setPhaseIndex((prev) => (prev + 1) % PHASE_ORDER.length);
+    }, duration);
+    return () => clearTimeout(timer);
+  }, [phaseIndex]);
+
+  return (
+    <AnimationContext.Provider value={PHASE_ORDER[phaseIndex]}>
+      {children}
+    </AnimationContext.Provider>
+  );
+}
+
 function AnimatedSentence() {
+  const activePhase = useContext(AnimationContext);
+  const isActive = activePhase === "sentence";
   const [step, setStep] = useState(0);
   const words = ["activiteit?", "Biertje doen", "gezelschap?", "Met vrienden", "stad?", "Amsterdam"];
 
   useEffect(() => {
+    if (!isActive) {
+      const resetTimer = setTimeout(() => setStep(0), 0);
+      return () => clearTimeout(resetTimer);
+    }
     const interval = setInterval(() => {
-      setStep((prev) => (prev + 1) % 4);
+      setStep((prev) => {
+        if (prev >= 3) return 3;
+        return prev + 1;
+      });
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isActive]);
 
   const vibeText = step >= 1 ? words[1] : words[0];
   const vibeActive = step >= 1;
@@ -47,7 +87,9 @@ function AnimatedSentence() {
   const stadActive = step >= 3;
 
   return (
-    <div className="mt-5 rounded-xl bg-white border border-espresso/8 p-5 shadow-sm">
+    <div className={`mt-5 rounded-xl bg-white border p-5 shadow-sm transition-all duration-500 ${
+      isActive ? "border-spritz/30 shadow-spritz/5" : "border-espresso/8"
+    }`}>
       <p className="font-display text-base sm:text-lg leading-relaxed text-espresso text-center">
         Ik zoek een lekker plekje voor{" "}
         <span
@@ -85,28 +127,40 @@ function AnimatedSentence() {
 }
 
 function ThumbAnimation() {
-  const [active, setActive] = useState(false);
+  const activePhase = useContext(AnimationContext);
+  const isActive = activePhase === "thumbs";
+  const [pulseCount, setPulseCount] = useState(0);
 
   useEffect(() => {
+    if (!isActive) {
+      const resetTimer = setTimeout(() => setPulseCount(0), 0);
+      return () => clearTimeout(resetTimer);
+    }
+    // Pulse the "Lekker" button a few times when active
     const interval = setInterval(() => {
-      setActive(true);
-      setTimeout(() => setActive(false), 600);
-    }, 3000);
+      setPulseCount((prev) => prev + 1);
+    }, 1200);
     return () => clearInterval(interval);
-  }, []);
+  }, [isActive]);
+
+  const showPulse = isActive && pulseCount % 2 === 1;
 
   return (
     <div className="mt-5 flex items-center justify-center gap-3">
       <button
         className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
-          active
+          showPulse
             ? "bg-frisgroen text-white scale-110 shadow-lg shadow-frisgroen/30"
             : "bg-frisgroen/10 text-frisgroen"
         }`}
       >
         Lekker
       </button>
-      <button className="inline-flex items-center gap-2 rounded-full bg-koraal/10 px-4 py-2 text-sm font-medium text-koraal">
+      <button className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
+        isActive && pulseCount % 4 === 3
+          ? "bg-koraal text-white scale-110 shadow-lg shadow-koraal/30"
+          : "bg-koraal/10 text-koraal"
+      }`}>
         Niet lekker
       </button>
     </div>
@@ -158,13 +212,20 @@ const STEPS = [
 function StepCard({ step, index }: { step: (typeof STEPS)[number]; index: number }) {
   const { ref, inView } = useInView(0.15);
   const [hovered, setHovered] = useState(false);
+  const activePhase = useContext(AnimationContext);
+
+  // Highlight the card when its animation is playing
+  const isAnimating =
+    (step.extra === "sentence" && activePhase === "sentence") ||
+    (step.extra === "tags" && activePhase === "tags") ||
+    (step.extra === "thumbs" && activePhase === "thumbs");
 
   return (
     <div
       ref={ref}
-      className={`rounded-2xl bg-white border border-espresso/8 p-6 transition-all duration-700 ease-out ${
+      className={`rounded-2xl bg-white border p-6 transition-all duration-700 ease-out ${
         inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      }`}
+      } ${isAnimating ? "border-espresso/20 shadow-lg shadow-espresso/5" : "border-espresso/8"}`}
       style={{ transitionDelay: `${index * 150}ms` }}
     >
       <div className="flex items-start gap-4">
@@ -173,7 +234,7 @@ function StepCard({ step, index }: { step: (typeof STEPS)[number]; index: number
           onMouseLeave={() => setHovered(false)}
           className={`w-11 h-11 rounded-xl ${step.bgColor} flex items-center justify-center text-sm font-bold ${step.textColor} shrink-0 transition-transform duration-300 cursor-default ${
             hovered ? "scale-110 rotate-6" : ""
-          }`}
+          } ${isAnimating ? "scale-110" : ""}`}
         >
           {step.number}
         </div>
@@ -220,16 +281,23 @@ function Badge({ label }: { label: string }) {
 
 function TagDemo() {
   const tags = ["Biertje doen", "Koffie", "Diner", "Terrasje pakken", "Date"];
+  const activePhase = useContext(AnimationContext);
+  const isActive = activePhase === "tags";
   const [activeTag, setActiveTag] = useState<number | null>(null);
 
   useEffect(() => {
+    if (!isActive) {
+      const resetTimer = setTimeout(() => setActiveTag(null), 0);
+      return () => clearTimeout(resetTimer);
+    }
     let i = 0;
+    const startTimer = setTimeout(() => setActiveTag(0), 0);
     const interval = setInterval(() => {
-      setActiveTag(i % tags.length);
       i++;
+      setActiveTag(i % tags.length);
     }, 1500);
-    return () => clearInterval(interval);
-  }, [tags.length]);
+    return () => { clearTimeout(startTimer); clearInterval(interval); };
+  }, [isActive, tags.length]);
 
   return (
     <div className="mt-5 flex flex-wrap justify-center gap-2">
@@ -280,11 +348,13 @@ export default function HoeHetWerktPage() {
           </div>
 
           {/* Steps — 2x2 grid on desktop, stacked on mobile */}
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-5">
-            {STEPS.map((step, i) => (
-              <StepCard key={step.number} step={step} index={i} />
-            ))}
-          </div>
+          <AnimationOrchestrator>
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-5">
+              {STEPS.map((step, i) => (
+                <StepCard key={step.number} step={step} index={i} />
+              ))}
+            </div>
+          </AnimationOrchestrator>
 
           {/* Breathing CTA */}
           <div
