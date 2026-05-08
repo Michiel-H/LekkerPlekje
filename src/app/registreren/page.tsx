@@ -118,7 +118,7 @@ export default function RegistrerenPage() {
 
             <div>
               <label className="block text-sm font-medium text-espresso mb-2">
-                Hoe wil je genoemd worden als Scout?
+                Hoe wil je genoemd worden als Toppertje?
               </label>
               <div className="flex gap-2">
                 {(

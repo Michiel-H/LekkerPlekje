@@ -35,7 +35,7 @@ export default function Home() {
                 Ontdekt door locals
               </h2>
               <p className="mt-2 text-espresso-light">
-                De lekkerste plekjes van Amsterdam, getipt door onze Scouts.
+                De lekkerste plekjes van Amsterdam, getipt door onze Toppertjes.
               </p>
             </div>
 
@@ -86,11 +86,11 @@ export default function Home() {
                   3
                 </div>
                 <h3 className="font-display text-lg font-semibold text-espresso">
-                  Word Scout
+                  Word Toppertje
                 </h3>
                 <p className="mt-2 text-sm text-espresso-light">
                   Tip 5 goedgekeurde plekjes en word een Lekker Ventje, Lekker
-                  Grietje of Toppertje. Scouts posten direct live.
+                  Grietje of Toppertje. Toppertjes posten direct live.
                 </p>
               </div>
             </div>

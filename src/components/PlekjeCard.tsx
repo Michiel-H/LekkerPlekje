@@ -6,8 +6,8 @@ interface PlekjeCardProps {
   neighborhood?: string | null;
   imageUrl?: string | null;
   tags: { emoji: string; name: string }[];
-  scoutName?: string;
-  scoutTitle?: string;
+  toppertjeName?: string;
+  toppertjeTitle?: string;
 }
 
 export default function PlekjeCard({
@@ -16,8 +16,8 @@ export default function PlekjeCard({
   neighborhood,
   imageUrl,
   tags,
-  scoutName,
-  scoutTitle,
+  toppertjeName,
+  toppertjeTitle,
 }: PlekjeCardProps) {
   return (
     <Link
@@ -64,10 +64,10 @@ export default function PlekjeCard({
           </div>
         )}
 
-        {scoutName && (
+        {toppertjeName && (
           <p className="mt-3 text-xs text-spritz font-medium">
-            Ontdekt door: {scoutName}{" "}
-            {scoutTitle && <span className="opacity-70">{scoutTitle}</span>}
+            Ontdekt door: {toppertjeName}{" "}
+            {toppertjeTitle && <span className="opacity-70">{toppertjeTitle}</span>}
           </p>
         )}
       </div>

@@ -25,7 +25,7 @@ export default function ProfielPage() {
     neutraal: "Toppertje",
   };
 
-  const myPlekjes = DEMO_PLEKJES.filter((p) => p.scoutName === "Patrick");
+  const myPlekjes = DEMO_PLEKJES.filter((p) => p.toppertjeName === "Patrick");
 
   return (
     <>
@@ -62,12 +62,12 @@ export default function ProfielPage() {
             </div>
           </div>
 
-          {/* Progress bar for non-scouts */}
+          {/* Progress bar for non-toppertjes */}
           {user.role === "user" && (
             <div className="mb-8 rounded-xl bg-white border border-espresso/8 p-4">
               <div className="flex justify-between text-sm mb-2">
                 <span className="font-medium text-espresso">
-                  Voortgang naar Scout
+                  Voortgang naar Toppertje
                 </span>
                 <span className="text-espresso-light">
                   {user.approvedCount}/5

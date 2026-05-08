@@ -74,15 +74,15 @@ export default async function PlekjeDetailPage({ params }: Props) {
             )}
           </div>
 
-          {/* Scout credit */}
-          {plekje.scoutName && (
+          {/* Toppertje credit */}
+          {plekje.toppertjeName && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-spritz/10 px-4 py-2">
               <span className="text-sm font-medium text-spritz">
-                Ontdekt door: {plekje.scoutName}
+                Ontdekt door: {plekje.toppertjeName}
               </span>
-              {plekje.scoutTitle && (
+              {plekje.toppertjeTitle && (
                 <span className="text-sm text-spritz/70">
-                  {plekje.scoutTitle}
+                  {plekje.toppertjeTitle}
                 </span>
               )}
             </div>

@@ -53,7 +53,7 @@ export default function ToevoegenPage() {
           </h1>
           <p className="mt-2 text-espresso-light max-w-md mx-auto">
             We checken je plekje en zetten het zo snel mogelijk live. Nog 5
-            goedgekeurde plekjes en je bent een Scout!
+            goedgekeurde plekjes en je bent een Toppertje!
           </p>
           <Button
             className="mt-6"

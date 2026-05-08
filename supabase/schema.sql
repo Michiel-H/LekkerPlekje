@@ -2,7 +2,7 @@
 -- Run this in Supabase SQL Editor
 
 -- Enums
-create type user_role as enum ('visitor', 'scout', 'admin');
+create type user_role as enum ('visitor', 'toppertje', 'admin');
 create type pronoun as enum ('vent', 'griet', 'neutraal');
 create type location_status as enum ('pending', 'approved', 'rejected');
 create type city_status as enum ('live', 'coming_soon');
@@ -149,7 +149,7 @@ create policy "Users update own votes" on public.votes
 create policy "Anyone can sign up for waitlist" on public.waitlist_signups
   for insert with check (true);
 
--- Scout promotion trigger: auto-promote to scout at 5 approved locations
+-- Toppertje promotion trigger: auto-promote to toppertje at 5 approved locations
 create or replace function public.handle_location_approval()
 returns trigger as $$
 begin
@@ -159,7 +159,7 @@ begin
     where id = new.submitted_by;
 
     update public.users
-    set role = 'scout'
+    set role = 'toppertje'
     where id = new.submitted_by
     and approved_count >= 5
     and role = 'visitor';
@@ -173,14 +173,14 @@ create trigger on_location_approved
   for each row
   execute function public.handle_location_approval();
 
--- Auto-approve for scouts
-create or replace function public.handle_scout_submission()
+-- Auto-approve for toppertjes
+create or replace function public.handle_toppertje_submission()
 returns trigger as $$
 declare
   submitter_role user_role;
 begin
   select role into submitter_role from public.users where id = new.submitted_by;
-  if submitter_role = 'scout' or submitter_role = 'admin' then
+  if submitter_role = 'toppertje' or submitter_role = 'admin' then
     new.status := 'approved';
     new.approved_at := now();
   end if;
@@ -191,7 +191,7 @@ $$ language plpgsql security definer;
 create trigger on_location_insert
   before insert on public.locations
   for each row
-  execute function public.handle_scout_submission();
+  execute function public.handle_toppertje_submission();
 
 -- Vote score update trigger
 create or replace function public.handle_vote_change()
