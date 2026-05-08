@@ -13,10 +13,7 @@ export default function Home() {
         {/* Hero + Mad Libs */}
         <section className="px-4 pt-16 pb-12 sm:pt-24 sm:pb-16">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-sm font-medium text-groen uppercase tracking-wider">
-              Amsterdam
-            </p>
-            <h1 className="mt-3 font-display text-4xl sm:text-5xl font-bold text-espresso leading-tight">
+            <h1 className="font-display text-4xl sm:text-5xl font-bold text-espresso leading-tight">
               Vind het lekkerste plekje 🍊
             </h1>
             <p className="mt-4 text-lg text-espresso-light max-w-xl mx-auto">
