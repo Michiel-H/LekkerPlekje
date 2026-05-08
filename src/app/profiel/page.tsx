@@ -8,13 +8,13 @@ export default function ProfielPage() {
   const user: {
     displayName: string;
     pronoun: "vent" | "griet" | "neutraal";
-    role: "visitor" | "scout" | "admin";
+    role: "user" | "toppertje" | "admin" | "superadmin";
     approvedCount: number;
     createdAt: string;
   } = {
     displayName: "Patrick",
     pronoun: "vent",
-    role: "scout",
+    role: "toppertje",
     approvedCount: 7,
     createdAt: "2026-04-01",
   };
@@ -42,13 +42,13 @@ export default function ProfielPage() {
                 {user.displayName}
               </h1>
               <div className="flex items-center gap-2 mt-1">
-                {user.role === "scout" ? (
+                {user.role === "toppertje" || user.role === "admin" || user.role === "superadmin" ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-spritz/10 px-3 py-1 text-sm font-medium text-spritz">
-                    {titleMap[user.pronoun]}
+                    {user.role === "admin" || user.role === "superadmin" ? "Beheerder" : titleMap[user.pronoun]}
                   </span>
                 ) : (
                   <span className="text-sm text-espresso-light">
-                    {user.approvedCount} / 5 plekjes tot Scout-status
+                    {user.approvedCount} / 5 plekjes tot Toppertje-status
                   </span>
                 )}
                 <span className="text-xs text-espresso-light">
@@ -63,7 +63,7 @@ export default function ProfielPage() {
           </div>
 
           {/* Progress bar for non-scouts */}
-          {user.role === "visitor" && (
+          {user.role === "user" && (
             <div className="mb-8 rounded-xl bg-white border border-espresso/8 p-4">
               <div className="flex justify-between text-sm mb-2">
                 <span className="font-medium text-espresso">

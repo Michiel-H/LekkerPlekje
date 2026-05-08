@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 
-export default function Header() {
+interface HeaderProps {
+  isAdmin?: boolean;
+}
+
+export default function Header({ isAdmin = false }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -36,6 +40,14 @@ export default function Header() {
             >
               + Plekje toevoegen
             </Link>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="text-sm font-medium text-groen hover:text-groen/80 transition-colors"
+              >
+                Admin
+              </Link>
+            )}
             <Link
               href="/login"
               className="inline-flex items-center rounded-full bg-espresso px-4 py-2 text-sm font-medium text-creme hover:bg-espresso-light transition-colors"
@@ -96,6 +108,15 @@ export default function Header() {
             >
               + Plekje toevoegen
             </Link>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="text-sm font-medium text-groen hover:text-groen/80"
+                onClick={() => setMenuOpen(false)}
+              >
+                Admin
+              </Link>
+            )}
             <Link
               href="/login"
               className="inline-flex w-fit items-center rounded-full bg-espresso px-4 py-2 text-sm font-medium text-creme"

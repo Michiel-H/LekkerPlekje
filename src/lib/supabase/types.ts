@@ -1,6 +1,6 @@
-export type UserRole = "visitor" | "scout" | "admin";
+export type UserRole = "user" | "toppertje" | "admin" | "superadmin";
 export type Pronoun = "vent" | "griet" | "neutraal";
-export type LocationStatus = "pending" | "approved" | "rejected";
+export type LocationStatus = "pending" | "published" | "rejected";
 export type CityStatus = "live" | "coming_soon";
 export type VoteType = "up" | "down";
 export type TagCategory = "gezelschap" | "vibe" | "setting";
