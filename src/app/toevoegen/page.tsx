@@ -12,6 +12,7 @@ import type { TagCategory } from "@/lib/supabase/types";
 export default function ToevoegenPage() {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [selectedTags, setSelectedTags] = useState<
     Record<string, string>
@@ -91,15 +92,16 @@ export default function ToevoegenPage() {
       return;
     }
 
-    // Get Amsterdam city_id
+    // Get city_id by matching the slug
+    const citySlug = city.toLowerCase().trim();
     const { data: cityData } = await supabase
       .from("cities")
       .select("id")
-      .eq("slug", "amsterdam")
+      .eq("slug", citySlug)
       .single();
 
-    const city = cityData as any;
-    if (!city) {
+    const cityRow = cityData as any;
+    if (!cityRow) {
       setError("Kon de stad niet vinden. Probeer het later opnieuw.");
       setLoading(false);
       return;
@@ -136,7 +138,7 @@ export default function ToevoegenPage() {
         name,
         address,
         neighborhood,
-        city_id: city.id,
+        city_id: cityRow.id,
         image_url: imageUrl,
         submitted_by: user.id,
       } as never)
@@ -195,6 +197,7 @@ export default function ToevoegenPage() {
               setSubmitted(false);
               setName("");
               setAddress("");
+              setCity("");
               setNeighborhood("");
               setSelectedTags({});
               setPhoto(null);
@@ -268,12 +271,15 @@ export default function ToevoegenPage() {
                     <li
                       key={item.place_id}
                       onClick={() => {
-                        const { road, house_number, city, town, village, neighbourhood, suburb } = item.address || {};
+                        const { road, house_number, city: addrCity, town, village, neighbourhood, suburb } = item.address || {};
                         const street = road ? `${road} ${house_number || ""}`.trim() : "";
-                        const place = city || town || village || "";
+                        const place = addrCity || town || village || "";
                         const fullAddress = street && place ? `${street}, ${place}` : item.display_name;
                         
                         setAddress(fullAddress);
+                        if (place) {
+                          setCity(place);
+                        }
                         if (neighbourhood || suburb) {
                           setNeighborhood(neighbourhood || suburb);
                         }
@@ -286,6 +292,21 @@ export default function ToevoegenPage() {
                   ))}
                 </ul>
               )}
+            </div>
+
+            {/* City */}
+            <div>
+              <label className="block text-sm font-medium text-espresso mb-1.5">
+                Stad
+              </label>
+              <input
+                type="text"
+                required
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="bijv. Amsterdam"
+                className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 focus:ring-spritz/50"
+              />
             </div>
 
             {/* Neighborhood */}
@@ -357,7 +378,7 @@ export default function ToevoegenPage() {
                 type="submit"
                 size="lg"
                 disabled={
-                  !name || !address || !neighborhood || !photo || Object.keys(selectedTags).length === 0 || loading
+                  !name || !address || !city || !neighborhood || !photo || Object.keys(selectedTags).length === 0 || loading
                 }
               >
                 {loading ? "Bezig met opslaan..." : "Plekje insturen"}
