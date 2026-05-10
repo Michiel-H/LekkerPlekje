@@ -16,7 +16,7 @@ export default function ToevoegenPage() {
   const [selectedTags, setSelectedTags] = useState<
     Record<string, string>
   >({});
-  const [motivations, setMotivations] = useState<Record<string, string>>({});
+  const [photo, setPhoto] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -68,9 +68,6 @@ export default function ToevoegenPage() {
       const next = { ...prev };
       if (next[slug]) {
         delete next[slug];
-        const m = { ...motivations };
-        delete m[slug];
-        setMotivations(m);
       } else {
         next[slug] = slug;
       }
@@ -108,14 +105,39 @@ export default function ToevoegenPage() {
       return;
     }
 
+    if (!photo) {
+      setError("Vergeet niet een foto toe te voegen!");
+      setLoading(false);
+      return;
+    }
+
+    // Upload photo
+    const fileExt = photo.name.split(".").pop();
+    const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage
+      .from("locations")
+      .upload(fileName, photo);
+
+    if (uploadError) {
+      setError("Er ging iets mis met het uploaden van de foto.");
+      setLoading(false);
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("locations")
+      .getPublicUrl(fileName);
+    const imageUrl = publicUrlData.publicUrl;
+
     // Insert location
     const { data: locationData, error: locationError } = await supabase
       .from("locations")
       .insert({
         name,
         address,
-        neighborhood: neighborhood || null,
+        neighborhood,
         city_id: city.id,
+        image_url: imageUrl,
         submitted_by: user.id,
       } as never)
       .select("id")
@@ -140,7 +162,7 @@ export default function ToevoegenPage() {
       const locationTagInserts = tagRows.map((tag: any) => ({
         location_id: location.id,
         tag_id: tag.id,
-        motivation: motivations[tag.slug] || null,
+        motivation: null,
       }));
 
       await supabase.from("location_tags").insert(locationTagInserts as never);
@@ -175,7 +197,7 @@ export default function ToevoegenPage() {
               setAddress("");
               setNeighborhood("");
               setSelectedTags({});
-              setMotivations({});
+              setPhoto(null);
             }}
           >
             Nog een plekje toevoegen
@@ -273,11 +295,33 @@ export default function ToevoegenPage() {
               </label>
               <input
                 type="text"
+                required
                 value={neighborhood}
                 onChange={(e) => setNeighborhood(e.target.value)}
                 placeholder="bijv. Jordaan, De Pijp, Oost"
                 className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 focus:ring-spritz/50"
               />
+            </div>
+
+            {/* Photo */}
+            <div>
+              <label className="block text-sm font-medium text-espresso mb-1.5">
+                Voeg een foto toe
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                required
+                onChange={(e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    setPhoto(e.target.files[0]);
+                  }
+                }}
+                className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-spritz/10 file:text-spritz hover:file:bg-spritz/20 focus:outline-none focus:ring-2 focus:ring-spritz/50"
+              />
+              <p className="mt-1 text-xs text-espresso-light">
+                Zorg voor een sfeervolle of duidelijke foto van het plekje (verplicht).
+              </p>
             </div>
 
             {/* Tags by category */}
@@ -305,29 +349,6 @@ export default function ToevoegenPage() {
                     );
                   })}
                 </div>
-
-                {/* Motivations for selected tags in this category */}
-                {TAGS.filter(
-                  (t) => t.category === key && selectedTags[t.slug]
-                ).map((tag) => (
-                  <div key={`mot-${tag.slug}`} className="mt-3 ml-2">
-                    <label className="block text-xs font-medium text-espresso-light mb-1">
-                      Waarom {tag.name}?
-                    </label>
-                    <input
-                      type="text"
-                      value={motivations[tag.slug] || ""}
-                      onChange={(e) =>
-                        setMotivations((prev) => ({
-                          ...prev,
-                          [tag.slug]: e.target.value,
-                        }))
-                      }
-                      placeholder="bijv. Hele gezellige binnentuin"
-                      className="w-full rounded-lg border border-espresso/10 bg-white px-3 py-2 text-sm text-espresso placeholder:text-espresso-light/40 focus:outline-none focus:ring-2 focus:ring-spritz/50"
-                    />
-                  </div>
-                ))}
               </div>
             ))}
 
@@ -336,7 +357,7 @@ export default function ToevoegenPage() {
                 type="submit"
                 size="lg"
                 disabled={
-                  !name || !address || Object.keys(selectedTags).length === 0 || loading
+                  !name || !address || !neighborhood || !photo || Object.keys(selectedTags).length === 0 || loading
                 }
               >
                 {loading ? "Bezig met opslaan..." : "Plekje insturen"}
