@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { DEMO_PLEKJES } from "@/lib/demo-data";
 import Link from "next/link";
 import VoteButtons from "./VoteButtons";
+import { createClient } from "@/lib/supabase/server";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -10,7 +11,68 @@ interface Props {
 
 export default async function PlekjeDetailPage({ params }: Props) {
   const { id } = await params;
-  const plekje = DEMO_PLEKJES.find((p) => p.id === id);
+
+  let plekje: any = null;
+
+  // Try fetching from Supabase if the id looks like a UUID
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+  if (isUUID) {
+    const supabase = await createClient();
+
+    const titleMap: Record<string, string> = {
+      vent: "Lekker ventje",
+      griet: "Lekker grietje",
+      neutraal: "Toppertje",
+    };
+
+    const { data: location } = await supabase
+      .from("locations")
+      .select(`
+        id,
+        name,
+        neighborhood,
+        image_url,
+        submitted_by,
+        location_tags (
+          tags (
+            name,
+            emoji
+          )
+        ),
+        users!locations_submitted_by_fkey (
+          display_name,
+          pronoun,
+          role
+        )
+      `)
+      .eq("id", id)
+      .single();
+
+    const loc = location as any;
+    if (loc) {
+      plekje = {
+        id: loc.id,
+        name: loc.name,
+        neighborhood: loc.neighborhood,
+        imageUrl: loc.image_url,
+        tags: (loc.location_tags || []).map((lt: any) => ({
+          emoji: lt.tags?.emoji || "",
+          name: lt.tags?.name || "",
+        })),
+        toppertjeName: loc.users?.display_name,
+        toppertjeTitle:
+          loc.users?.role === "toppertje" || loc.users?.role === "admin" || loc.users?.role === "superadmin"
+            ? titleMap[loc.users?.pronoun || "neutraal"]
+            : undefined,
+      };
+    }
+  }
+
+  // Fall back to demo data
+  if (!plekje) {
+    plekje = DEMO_PLEKJES.find((p) => p.id === id) || null;
+  }
 
   if (!plekje) {
     return (
@@ -94,7 +156,7 @@ export default async function PlekjeDetailPage({ params }: Props) {
               Wat vinden mensen?
             </h2>
             <div className="space-y-3">
-              {plekje.tags.map((tag) => (
+              {plekje.tags.map((tag: any) => (
                 <div
                   key={tag.name}
                   className="flex items-center justify-between rounded-xl bg-white border border-espresso/8 p-4"

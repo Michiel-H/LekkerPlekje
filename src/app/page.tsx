@@ -3,8 +3,59 @@ import Footer from "@/components/Footer";
 import MadLibsSearch from "@/components/MadLibsSearch";
 import PlekjeCard from "@/components/PlekjeCard";
 import { DEMO_PLEKJES } from "@/lib/demo-data";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+
+  const { data: locations } = await supabase
+    .from("locations")
+    .select(`
+      id,
+      name,
+      neighborhood,
+      image_url,
+      submitted_by,
+      location_tags (
+        tags (
+          name,
+          emoji
+        )
+      ),
+      users!locations_submitted_by_fkey (
+        display_name,
+        pronoun,
+        role
+      )
+    `)
+    .eq("status", "published")
+    .limit(6);
+
+  const titleMap: Record<string, string> = {
+    vent: "Lekker ventje",
+    griet: "Lekker grietje",
+    neutraal: "Toppertje",
+  };
+
+  const plekjes =
+    locations && locations.length > 0
+      ? locations.map((loc: any) => ({
+          id: loc.id,
+          name: loc.name,
+          neighborhood: loc.neighborhood,
+          imageUrl: loc.image_url,
+          tags: (loc.location_tags || []).map((lt: any) => ({
+            emoji: lt.tags?.emoji || "",
+            name: lt.tags?.name || "",
+          })),
+          toppertjeName: loc.users?.display_name,
+          toppertjeTitle:
+            loc.users?.role === "toppertje" || loc.users?.role === "admin" || loc.users?.role === "superadmin"
+              ? titleMap[loc.users?.pronoun || "neutraal"]
+              : undefined,
+        }))
+      : DEMO_PLEKJES;
+
   return (
     <>
       <Header />
@@ -40,7 +91,7 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {DEMO_PLEKJES.map((plekje) => (
+              {plekjes.map((plekje: any) => (
                 <PlekjeCard key={plekje.id} {...plekje} />
               ))}
             </div>

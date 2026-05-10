@@ -1,18 +1,38 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: Supabase auth signInWithPassword
+    setError(null);
+    setLoading(true);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    router.push("/profiel");
   }
 
   return (
@@ -28,6 +48,12 @@ export default function LoginPage() {
               Log in om plekjes toe te voegen en te stemmen.
             </p>
           </div>
+
+          {error && (
+            <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -58,8 +84,8 @@ export default function LoginPage() {
               />
             </div>
 
-            <Button type="submit" size="lg" className="w-full">
-              Inloggen
+            <Button type="submit" size="lg" className="w-full" disabled={loading}>
+              {loading ? "Bezig..." : "Inloggen"}
             </Button>
           </form>
 

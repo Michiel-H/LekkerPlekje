@@ -4,6 +4,7 @@ import PlekjeCard from "@/components/PlekjeCard";
 import { DEMO_PLEKJES } from "@/lib/demo-data";
 import { TAGS } from "@/lib/tags";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
 interface Props {
   searchParams: Promise<{ gezelschap?: string; vibe?: string; stad?: string }>;
@@ -18,14 +19,132 @@ export default async function ResultatenPage({ searchParams }: Props) {
     (slug) => TAGS.find((t) => t.slug === slug)!
   ).filter(Boolean);
 
-  // Demo: filter plekjes that have at least one matching tag
-  const filtered = DEMO_PLEKJES.filter((plekje) =>
-    tagDetails.some((tag) =>
-      plekje.tags.some((pt) => pt.name === tag.name)
-    )
-  );
+  const supabase = await createClient();
 
-  const results = filtered.length > 0 ? filtered : DEMO_PLEKJES;
+  const titleMap: Record<string, string> = {
+    vent: "Lekker ventje",
+    griet: "Lekker grietje",
+    neutraal: "Toppertje",
+  };
+
+  let results: any[] = [];
+
+  if (selectedTags.length > 0) {
+    // Get tag IDs from the database for the selected slugs
+    const { data: dbTags } = await supabase
+      .from("tags")
+      .select("id, slug")
+      .in("slug", selectedTags);
+
+    const tagRows = dbTags as any[] | null;
+    if (tagRows && tagRows.length > 0) {
+      const tagIds = tagRows.map((t: any) => t.id);
+
+      // Find locations that have these tags
+      const { data: locationTags } = await supabase
+        .from("location_tags")
+        .select("location_id")
+        .in("tag_id", tagIds);
+
+      const ltRows = locationTags as any[] | null;
+      if (ltRows && ltRows.length > 0) {
+        const locationIds = [...new Set(ltRows.map((lt: any) => lt.location_id))];
+
+        const { data: locations } = await supabase
+          .from("locations")
+          .select(`
+            id,
+            name,
+            neighborhood,
+            image_url,
+            submitted_by,
+            location_tags (
+              tags (
+                name,
+                emoji
+              )
+            ),
+            users!locations_submitted_by_fkey (
+              display_name,
+              pronoun,
+              role
+            )
+          `)
+          .eq("status", "published")
+          .in("id", locationIds);
+
+        if (locations && locations.length > 0) {
+          results = (locations as any[]).map((loc: any) => ({
+            id: loc.id,
+            name: loc.name,
+            neighborhood: loc.neighborhood,
+            imageUrl: loc.image_url,
+            tags: (loc.location_tags || []).map((lt: any) => ({
+              emoji: lt.tags?.emoji || "",
+              name: lt.tags?.name || "",
+            })),
+            toppertjeName: loc.users?.display_name,
+            toppertjeTitle:
+              loc.users?.role === "toppertje" || loc.users?.role === "admin" || loc.users?.role === "superadmin"
+                ? titleMap[loc.users?.pronoun || "neutraal"]
+                : undefined,
+          }));
+        }
+      }
+    }
+  } else {
+    // No filters — show all published locations
+    const { data: locations } = await supabase
+      .from("locations")
+      .select(`
+        id,
+        name,
+        neighborhood,
+        image_url,
+        submitted_by,
+        location_tags (
+          tags (
+            name,
+            emoji
+          )
+        ),
+        users!locations_submitted_by_fkey (
+          display_name,
+          pronoun,
+          role
+        )
+      `)
+      .eq("status", "published")
+      .limit(20);
+
+    if (locations && locations.length > 0) {
+      results = locations.map((loc: any) => ({
+        id: loc.id,
+        name: loc.name,
+        neighborhood: loc.neighborhood,
+        imageUrl: loc.image_url,
+        tags: (loc.location_tags || []).map((lt: any) => ({
+          emoji: lt.tags?.emoji || "",
+          name: lt.tags?.name || "",
+        })),
+        toppertjeName: loc.users?.display_name,
+        toppertjeTitle:
+          loc.users?.role === "toppertje" || loc.users?.role === "admin" || loc.users?.role === "superadmin"
+            ? titleMap[loc.users?.pronoun || "neutraal"]
+            : undefined,
+      }));
+    }
+  }
+
+  // Fall back to demo data if no real results
+  if (results.length === 0) {
+    const filtered = DEMO_PLEKJES.filter((plekje) =>
+      tagDetails.some((tag) =>
+        plekje.tags.some((pt) => pt.name === tag.name)
+      )
+    );
+    results = filtered.length > 0 ? filtered : DEMO_PLEKJES;
+  }
 
   return (
     <>
@@ -88,7 +207,7 @@ export default async function ResultatenPage({ searchParams }: Props) {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {results.map((plekje) => (
+            {results.map((plekje: any) => (
               <PlekjeCard key={plekje.id} {...plekje} />
             ))}
           </div>

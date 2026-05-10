@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import { TAGS } from "@/lib/tags";
+import { createClient } from "@/lib/supabase/client";
 import type { TagCategory } from "@/lib/supabase/types";
 
 export default function ToevoegenPage() {
@@ -16,6 +18,9 @@ export default function ToevoegenPage() {
   >({});
   const [motivations, setMotivations] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   function toggleTag(slug: string) {
     setSelectedTags((prev) => {
@@ -32,9 +37,75 @@ export default function ToevoegenPage() {
     });
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: submit to Supabase
+    setError(null);
+    setLoading(true);
+
+    const supabase = createClient();
+
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setError("Je moet ingelogd zijn om een plekje toe te voegen.");
+      setLoading(false);
+      router.push("/login");
+      return;
+    }
+
+    // Get Amsterdam city_id
+    const { data: cityData } = await supabase
+      .from("cities")
+      .select("id")
+      .eq("slug", "amsterdam")
+      .single();
+
+    const city = cityData as any;
+    if (!city) {
+      setError("Kon de stad niet vinden. Probeer het later opnieuw.");
+      setLoading(false);
+      return;
+    }
+
+    // Insert location
+    const { data: locationData, error: locationError } = await supabase
+      .from("locations")
+      .insert({
+        name,
+        address,
+        neighborhood: neighborhood || null,
+        city_id: city.id,
+        submitted_by: user.id,
+      } as never)
+      .select("id")
+      .single();
+
+    const location = locationData as any;
+    if (locationError || !location) {
+      setError(locationError?.message || "Kon het plekje niet opslaan.");
+      setLoading(false);
+      return;
+    }
+
+    // Get tag IDs for selected tags
+    const tagSlugs = Object.keys(selectedTags);
+    const { data: dbTags } = await supabase
+      .from("tags")
+      .select("id, slug")
+      .in("slug", tagSlugs);
+
+    const tagRows = dbTags as any[] | null;
+    if (tagRows && tagRows.length > 0) {
+      const locationTagInserts = tagRows.map((tag: any) => ({
+        location_id: location.id,
+        tag_id: tag.id,
+        motivation: motivations[tag.slug] || null,
+      }));
+
+      await supabase.from("location_tags").insert(locationTagInserts as never);
+    }
+
+    setLoading(false);
     setSubmitted(true);
   }
 
@@ -86,6 +157,12 @@ export default function ToevoegenPage() {
             Ken je een lekker plekje? Deel het met de rest! Kies de tags die
             passen en schrijf er een korte motivatie bij.
           </p>
+
+          {error && (
+            <div className="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
             {/* Name */}
@@ -188,10 +265,10 @@ export default function ToevoegenPage() {
                 type="submit"
                 size="lg"
                 disabled={
-                  !name || !address || Object.keys(selectedTags).length === 0
+                  !name || !address || Object.keys(selectedTags).length === 0 || loading
                 }
               >
-                Plekje insturen
+                {loading ? "Bezig met opslaan..." : "Plekje insturen"}
               </Button>
             </div>
           </form>
