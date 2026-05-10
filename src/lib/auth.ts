@@ -24,7 +24,18 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
     .eq("id", authUser.id)
     .single();
 
-  return profile as UserProfile | null;
+  if (profile) {
+    return profile as UserProfile;
+  }
+
+  return {
+    id: authUser.id,
+    display_name: authUser.user_metadata?.display_name || "Nieuw lid",
+    pronoun: authUser.user_metadata?.pronoun || "neutraal",
+    role: "user",
+    approved_count: 0,
+    created_at: authUser.created_at,
+  } as UserProfile;
 }
 
 export function isAdmin(role: UserRole) {

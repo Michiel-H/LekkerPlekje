@@ -28,6 +28,11 @@ export default function Header({ isAdmin = false }: HeaderProps) {
       if (profile) {
         const name = (profile as any).display_name || "?";
         setUser({ displayName: name, initial: name.charAt(0).toUpperCase() });
+      } else if (authUser.user_metadata?.display_name) {
+        const name = authUser.user_metadata.display_name;
+        setUser({ displayName: name, initial: name.charAt(0).toUpperCase() });
+      } else {
+        setUser({ displayName: "Gast", initial: "G" });
       }
     }
 
