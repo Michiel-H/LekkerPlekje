@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -21,6 +21,47 @@ export default function ToevoegenPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    if (!address || address.length < 3 || !showAddressSuggestions) {
+      const t = setTimeout(() => {
+        if (active) setAddressSuggestions([]);
+      }, 0);
+      return () => {
+        active = false;
+        clearTimeout(t);
+      };
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+            address
+          )}&format=json&addressdetails=1&countrycodes=nl&limit=5`,
+          {
+            headers: {
+              "User-Agent": "LekkerPlekjeApp/1.0",
+            },
+          }
+        );
+        const data = await res.json();
+        if (active) setAddressSuggestions(data);
+      } catch (err) {
+        console.error("Nominatim search error:", err);
+      }
+    }, 400);
+
+    return () => {
+      active = false;
+      clearTimeout(delayDebounceFn);
+    };
+  }, [address, showAddressSuggestions]);
 
   function toggleTag(slug: string) {
     setSelectedTags((prev) => {
@@ -181,7 +222,7 @@ export default function ToevoegenPage() {
             </div>
 
             {/* Address */}
-            <div>
+            <div className="relative">
               <label className="block text-sm font-medium text-espresso mb-1.5">
                 Adres
               </label>
@@ -189,10 +230,40 @@ export default function ToevoegenPage() {
                 type="text"
                 required
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                onChange={(e) => {
+                  setAddress(e.target.value);
+                  setShowAddressSuggestions(true);
+                }}
+                onFocus={() => setShowAddressSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowAddressSuggestions(false), 200)}
                 placeholder="bijv. Kerkstraat 41, Amsterdam"
                 className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 focus:ring-spritz/50"
               />
+              {/* Dropdown */}
+              {showAddressSuggestions && addressSuggestions.length > 0 && (
+                <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-xl border border-espresso/15 bg-white shadow-lg text-left">
+                  {addressSuggestions.map((item) => (
+                    <li
+                      key={item.place_id}
+                      onClick={() => {
+                        const { road, house_number, city, town, village, neighbourhood, suburb } = item.address || {};
+                        const street = road ? `${road} ${house_number || ""}`.trim() : "";
+                        const place = city || town || village || "";
+                        const fullAddress = street && place ? `${street}, ${place}` : item.display_name;
+                        
+                        setAddress(fullAddress);
+                        if (neighbourhood || suburb) {
+                          setNeighborhood(neighbourhood || suburb);
+                        }
+                        setShowAddressSuggestions(false);
+                      }}
+                      className="cursor-pointer px-4 py-2.5 text-sm text-espresso hover:bg-spritz/5 border-b border-espresso/5 last:border-0 truncate"
+                    >
+                      {item.display_name}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Neighborhood */}
@@ -213,7 +284,7 @@ export default function ToevoegenPage() {
             {categories.map(({ key, label }) => (
               <div key={key}>
                 <label className="block text-sm font-medium text-espresso mb-2">
-                  {label}
+                  {key === "vibe" ? "Wat kan je hier doen?" : label}
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {TAGS.filter((t) => t.category === key).map((tag) => {
