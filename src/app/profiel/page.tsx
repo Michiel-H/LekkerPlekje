@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import PlekjeCard from "@/components/PlekjeCard";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import LogoutButton from "./LogoutButton";
 
 export default async function ProfielPage() {
   const user = await getCurrentUser();
@@ -141,6 +142,13 @@ export default async function ProfielPage() {
               <p className="text-espresso-light">
                 Je hebt nog geen plekjes getipt. Begin met je eerste!
               </p>
+            </div>
+          )}
+
+          {/* Discrete logout */}
+          {user && (
+            <div className="mt-12 pt-6 border-t border-espresso/8 text-center">
+              <LogoutButton />
             </div>
           )}
         </div>
