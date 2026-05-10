@@ -34,6 +34,9 @@ export default async function PlekjeDetailPage({ params }: Props) {
         image_url,
         submitted_by,
         location_tags (
+          id,
+          score,
+          total_votes,
           tags (
             name,
             emoji
@@ -56,8 +59,11 @@ export default async function PlekjeDetailPage({ params }: Props) {
         neighborhood: loc.neighborhood,
         imageUrl: loc.image_url,
         tags: (loc.location_tags || []).map((lt: any) => ({
+          locationTagId: lt.id,
           emoji: lt.tags?.emoji || "",
           name: lt.tags?.name || "",
+          lekkerCount: lt.score || 0,
+          nietLekkerCount: (lt.total_votes || 0) - (lt.score || 0),
         })),
         toppertjeName: loc.users?.display_name,
         toppertjeTitle:
@@ -153,14 +159,29 @@ export default async function PlekjeDetailPage({ params }: Props) {
               {plekje.tags.map((tag: any) => (
                 <div
                   key={tag.name}
-                  className="flex items-center justify-between rounded-xl bg-white border border-espresso/8 p-4"
+                  className="rounded-xl bg-white border border-espresso/8 p-4"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-espresso">
                       {tag.name}
                     </span>
+                    <VoteButtons
+                      locationTagId={tag.locationTagId}
+                      initialLekker={tag.lekkerCount}
+                      initialNietLekker={tag.nietLekkerCount}
+                    />
                   </div>
-                  <VoteButtons tagName={tag.name} />
+                  {/* Percentage bar */}
+                  {(tag.lekkerCount + tag.nietLekkerCount) > 0 && (
+                    <div className="h-2 rounded-full bg-koraal/20 overflow-hidden">
+                      <div
+                        className="h-2 rounded-full bg-frisgroen transition-all"
+                        style={{
+                          width: `${(tag.lekkerCount / (tag.lekkerCount + tag.nietLekkerCount)) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

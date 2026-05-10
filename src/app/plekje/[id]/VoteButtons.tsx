@@ -1,33 +1,122 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 interface VoteButtonsProps {
-  tagName: string;
+  locationTagId: string;
+  initialLekker: number;
+  initialNietLekker: number;
 }
 
-export default function VoteButtons({ tagName }: VoteButtonsProps) {
+export default function VoteButtons({
+  locationTagId,
+  initialLekker,
+  initialNietLekker,
+}: VoteButtonsProps) {
   const [vote, setVote] = useState<"up" | "down" | null>(null);
-  const [upCount, setUpCount] = useState(
-    Math.floor(Math.random() * 20) + 5
-  );
-  const [downCount, setDownCount] = useState(
-    Math.floor(Math.random() * 5)
-  );
+  const [lekkerCount, setLekkerCount] = useState(initialLekker);
+  const [nietLekkerCount, setNietLekkerCount] = useState(initialNietLekker);
 
-  function handleVote(type: "up" | "down") {
-    if (vote === type) {
-      setVote(null);
-      if (type === "up") setUpCount((c) => c - 1);
-      else setDownCount((c) => c - 1);
-    } else {
-      if (vote === "up") setUpCount((c) => c - 1);
-      if (vote === "down") setDownCount((c) => c - 1);
-      setVote(type);
-      if (type === "up") setUpCount((c) => c + 1);
-      else setDownCount((c) => c + 1);
+  // Load current user's existing vote and subscribe to live changes
+  useEffect(() => {
+    const supabase = createClient();
+    let cancelled = false;
+
+    async function loadCurrentVote() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+
+      const { data } = await supabase
+        .from("votes")
+        .select("vote_type")
+        .eq("user_id", user.id)
+        .eq("location_tag_id", locationTagId)
+        .maybeSingle();
+
+      if (cancelled) return;
+      const v = (data as any)?.vote_type;
+      if (v === "up") setVote("up");
+      else if (v === "down") setVote("down");
     }
-    // TODO: persist vote to Supabase
+
+    async function refreshCounts() {
+      const { data } = await supabase
+        .from("location_tags")
+        .select("score, total_votes")
+        .eq("id", locationTagId)
+        .single();
+      if (cancelled || !data) return;
+      const row = data as any;
+      const score = row.score || 0;
+      const total = row.total_votes || 0;
+      setLekkerCount(score);
+      setNietLekkerCount(total - score);
+    }
+
+    loadCurrentVote();
+
+    // Subscribe to vote changes for this location_tag — updates counts live
+    const channel = supabase
+      .channel(`votes-${locationTagId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "votes",
+          filter: `location_tag_id=eq.${locationTagId}`,
+        },
+        () => {
+          refreshCounts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, [locationTagId]);
+
+  async function handleVote(type: "up" | "down") {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    if (vote === type) {
+      // Remove vote
+      setVote(null);
+      if (type === "up") setLekkerCount((c) => c - 1);
+      else setNietLekkerCount((c) => c - 1);
+
+      await supabase
+        .from("votes")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("location_tag_id", locationTagId);
+    } else {
+      // Switch or new vote
+      if (vote === "up") setLekkerCount((c) => c - 1);
+      if (vote === "down") setNietLekkerCount((c) => c - 1);
+      setVote(type);
+      if (type === "up") setLekkerCount((c) => c + 1);
+      else setNietLekkerCount((c) => c + 1);
+
+      await supabase.from("votes").upsert(
+        {
+          user_id: user.id,
+          location_tag_id: locationTagId,
+          vote_type: type,
+        } as never,
+        { onConflict: "user_id,location_tag_id" }
+      );
+    }
   }
 
   return (
@@ -39,9 +128,8 @@ export default function VoteButtons({ tagName }: VoteButtonsProps) {
             ? "bg-frisgroen text-white"
             : "bg-frisgroen/10 text-frisgroen hover:bg-frisgroen/20"
         }`}
-        aria-label={`${tagName} is lekker`}
       >
-        Lekker {upCount}
+        Lekker {lekkerCount}
       </button>
       <button
         onClick={() => handleVote("down")}
@@ -50,9 +138,8 @@ export default function VoteButtons({ tagName }: VoteButtonsProps) {
             ? "bg-koraal text-white"
             : "bg-koraal/10 text-koraal hover:bg-koraal/20"
         }`}
-        aria-label={`${tagName} is niet zo lekker`}
       >
-        Niet lekker {downCount}
+        Niet lekker {nietLekkerCount}
       </button>
     </div>
   );
