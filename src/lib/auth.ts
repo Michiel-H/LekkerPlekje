@@ -9,6 +9,8 @@ interface UserProfile {
   approved_count: number;
   created_at: string;
   preferred_city_id?: string | null;
+  avatar_url?: string | null;
+  bio?: string | null;
 }
 
 export async function getCurrentUser(): Promise<UserProfile | null> {

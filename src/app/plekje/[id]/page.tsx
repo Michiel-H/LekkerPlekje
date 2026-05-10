@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import VoteButtons from "./VoteButtons";
+import FavoriteButton from "@/components/FavoriteButton";
 import { createClient } from "@/lib/supabase/server";
 
 interface Props {
@@ -125,15 +126,18 @@ export default async function PlekjeDetailPage({ params }: Props) {
           </div>
 
           {/* Info */}
-          <div className="mt-6">
-            <h1 className="font-display text-3xl sm:text-4xl font-bold text-espresso">
-              {plekje.name}
-            </h1>
-            {plekje.neighborhood && (
-              <p className="mt-1 text-lg text-espresso-light">
-                {plekje.neighborhood}, Amsterdam
-              </p>
-            )}
+          <div className="mt-6 flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="font-display text-3xl sm:text-4xl font-bold text-espresso">
+                {plekje.name}
+              </h1>
+              {plekje.neighborhood && (
+                <p className="mt-1 text-lg text-espresso-light">
+                  {plekje.neighborhood}, Amsterdam
+                </p>
+              )}
+            </div>
+            <FavoriteButton locationId={plekje.id} size="md" />
           </div>
 
           {/* Toppertje credit */}

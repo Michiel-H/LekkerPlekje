@@ -1,4 +1,5 @@
 import Link from "next/link";
+import FavoriteButton from "./FavoriteButton";
 
 interface PlekjeCardProps {
   id: string;
@@ -36,6 +37,9 @@ export default function PlekjeCard({
             Geen afbeelding
           </div>
         )}
+        <div className="absolute top-2 right-2">
+          <FavoriteButton locationId={id} size="sm" />
+        </div>
       </div>
 
       <div className="p-4">

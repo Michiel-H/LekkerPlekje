@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export default function Header({ isAdmin: isAdminProp = false }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState<{ displayName: string; initial: string } | null>(null);
+  const [user, setUser] = useState<{ displayName: string; initial: string; avatarUrl: string | null } | null>(null);
   const [isAdmin, setIsAdmin] = useState(isAdminProp);
 
   useEffect(() => {
@@ -25,20 +25,28 @@ export default function Header({ isAdmin: isAdminProp = false }: HeaderProps) {
 
       const { data: profile } = await supabase
         .from("users")
-        .select("display_name, role")
+        .select("display_name, role, avatar_url")
         .eq("id", authUser.id)
         .single();
 
       if (profile) {
         const p = profile as any;
         const name = p.display_name || "?";
-        setUser({ displayName: name, initial: name.charAt(0).toUpperCase() });
+        setUser({
+          displayName: name,
+          initial: name.charAt(0).toUpperCase(),
+          avatarUrl: p.avatar_url ?? null,
+        });
         setIsAdmin(p.role === "admin" || p.role === "superadmin");
       } else if (authUser.user_metadata?.display_name) {
         const name = authUser.user_metadata.display_name;
-        setUser({ displayName: name, initial: name.charAt(0).toUpperCase() });
+        setUser({
+          displayName: name,
+          initial: name.charAt(0).toUpperCase(),
+          avatarUrl: null,
+        });
       } else {
-        setUser({ displayName: "Gast", initial: "G" });
+        setUser({ displayName: "Gast", initial: "G", avatarUrl: null });
       }
     }
 
@@ -103,8 +111,13 @@ export default function Header({ isAdmin: isAdminProp = false }: HeaderProps) {
                 prefetch={false}
                 className="inline-flex items-center gap-2 rounded-full bg-spritz/10 px-3 py-1.5 text-sm font-medium text-spritz hover:bg-spritz/20 transition-colors"
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-spritz text-xs font-bold text-white">
-                  {user.initial}
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-spritz text-xs font-bold text-white overflow-hidden">
+                  {user.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    user.initial
+                  )}
                 </span>
                 {user.displayName}
               </Link>
@@ -190,8 +203,13 @@ export default function Header({ isAdmin: isAdminProp = false }: HeaderProps) {
                 className="inline-flex w-fit items-center gap-2 rounded-full bg-spritz/10 px-3 py-1.5 text-sm font-medium text-spritz"
                 onClick={() => setMenuOpen(false)}
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-spritz text-xs font-bold text-white">
-                  {user.initial}
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-spritz text-xs font-bold text-white overflow-hidden">
+                  {user.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    user.initial
+                  )}
                 </span>
                 {user.displayName}
               </Link>

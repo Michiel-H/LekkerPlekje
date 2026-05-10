@@ -5,6 +5,9 @@ import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "./LogoutButton";
 import CityPicker from "./CityPicker";
+import AvatarUpload from "./AvatarUpload";
+import BioEditor from "./BioEditor";
+import ProfielTabs from "./ProfielTabs";
 
 export default async function ProfielPage() {
   const user = await getCurrentUser();
@@ -15,27 +18,23 @@ export default async function ProfielPage() {
     neutraal: "Toppertje",
   };
 
-  // Middleware redirects to /login if not authed, but handle gracefully
-  const displayUser = user
-    ? {
-        displayName: user.display_name,
-        pronoun: user.pronoun,
-        role: user.role,
-        approvedCount: user.approved_count,
-        createdAt: user.created_at,
-      }
-    : {
-        displayName: "Gast",
-        pronoun: "neutraal" as const,
-        role: "user" as const,
-        approvedCount: 0,
-        createdAt: new Date().toISOString(),
-      };
+  if (!user) {
+    return (
+      <>
+        <Header />
+        <main className="flex-1 px-4 py-16 text-center">
+          <p className="text-espresso-light">Je moet ingelogd zijn.</p>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
-  // Fetch preferred city name (if any)
+  const supabase = await createClient();
+
+  // Fetch preferred city name
   let preferredCityName: string | null = null;
-  if (user?.preferred_city_id) {
-    const supabase = await createClient();
+  if (user.preferred_city_id) {
     const { data: city } = await supabase
       .from("cities")
       .select("name")
@@ -44,43 +43,92 @@ export default async function ProfielPage() {
     preferredCityName = (city as any)?.name ?? null;
   }
 
-  let myPlekjes: any[] = [];
+  // Fetch all my locations (any status) for tabs
+  const { data: myLocations } = await supabase
+    .from("locations")
+    .select(`
+      id, name, neighborhood, image_url, status, created_at,
+      location_tags (tags (name, emoji))
+    `)
+    .eq("submitted_by", user.id)
+    .order("created_at", { ascending: false });
 
-  if (user) {
-    const supabase = await createClient();
-    const { data: locations } = await supabase
-      .from("locations")
-      .select(`
-        id,
-        name,
-        neighborhood,
-        image_url,
-        location_tags (
-          tags (
-            name,
-            emoji
-          )
-        )
-      `)
-      .eq("submitted_by", user.id);
+  const isToppertjeLike =
+    user.role === "toppertje" || user.role === "admin" || user.role === "superadmin";
 
-    if (locations && locations.length > 0) {
-      myPlekjes = locations.map((loc: any) => ({
-        id: loc.id,
-        name: loc.name,
-        neighborhood: loc.neighborhood,
-        imageUrl: loc.image_url,
-        tags: (loc.location_tags || []).map((lt: any) => ({
-          emoji: lt.tags?.emoji || "",
-          name: lt.tags?.name || "",
-        })),
-        toppertjeName: displayUser.displayName,
-        toppertjeTitle:
-          displayUser.role === "toppertje" || displayUser.role === "admin" || displayUser.role === "superadmin"
-            ? titleMap[displayUser.pronoun]
-            : undefined,
-      }));
-    }
+  const myPublished = (myLocations || []).filter((l: any) => l.status === "published");
+  const myPending = (myLocations || []).filter((l: any) => l.status === "pending");
+  const myRejected = (myLocations || []).filter((l: any) => l.status === "rejected");
+
+  function mapPlekje(loc: any) {
+    return {
+      id: loc.id,
+      name: loc.name,
+      neighborhood: loc.neighborhood,
+      imageUrl: loc.image_url,
+      tags: (loc.location_tags || []).map((lt: any) => ({
+        emoji: lt.tags?.emoji || "",
+        name: lt.tags?.name || "",
+      })),
+      toppertjeName: user!.display_name,
+      toppertjeTitle: isToppertjeLike ? titleMap[user!.pronoun] : undefined,
+    };
+  }
+
+  // Fetch favorites
+  const { data: favorites } = await supabase
+    .from("favorites")
+    .select(`
+      location_id,
+      locations (
+        id, name, neighborhood, image_url, status,
+        location_tags (tags (name, emoji)),
+        users!locations_submitted_by_fkey (display_name, pronoun, role)
+      )
+    `)
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  const favoritePlekjes = ((favorites || []) as any[])
+    .map((f: any) => f.locations)
+    .filter((l: any) => l && l.status === "published")
+    .map((loc: any) => ({
+      id: loc.id,
+      name: loc.name,
+      neighborhood: loc.neighborhood,
+      imageUrl: loc.image_url,
+      tags: (loc.location_tags || []).map((lt: any) => ({
+        emoji: lt.tags?.emoji || "",
+        name: lt.tags?.name || "",
+      })),
+      toppertjeName: loc.users?.display_name,
+      toppertjeTitle:
+        loc.users?.role === "toppertje" ||
+        loc.users?.role === "admin" ||
+        loc.users?.role === "superadmin"
+          ? titleMap[loc.users?.pronoun || "neutraal"]
+          : undefined,
+    }));
+
+  // Smaak-score: % of "up" votes across the user's location_tags
+  let smaakScore: number | null = null;
+  let smaakTotal = 0;
+  if (myPublished.length > 0) {
+    const locationIds = myPublished.map((l: any) => l.id);
+    const { data: ltRows } = await supabase
+      .from("location_tags")
+      .select("score, total_votes")
+      .in("location_id", locationIds);
+    const totals = (ltRows || []).reduce(
+      (acc: { up: number; total: number }, lt: any) => {
+        acc.up += lt.score || 0;
+        acc.total += lt.total_votes || 0;
+        return acc;
+      },
+      { up: 0, total: 0 }
+    );
+    smaakTotal = totals.total;
+    if (totals.total >= 30) smaakScore = Math.round((totals.up / totals.total) * 100);
   }
 
   return (
@@ -89,88 +137,111 @@ export default async function ProfielPage() {
       <main className="flex-1 px-4 py-8 sm:py-12">
         <div className="mx-auto max-w-4xl">
           {/* Profile header */}
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-16 h-16 rounded-full bg-spritz/10 flex items-center justify-center text-2xl font-display font-bold text-spritz">
-              {displayUser.displayName.charAt(0)}
-            </div>
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-start gap-6 mb-8">
+            <AvatarUpload
+              userId={user.id}
+              initialUrl={user.avatar_url ?? null}
+              fallbackInitial={user.display_name.charAt(0).toUpperCase()}
+            />
+            <div className="flex-1 min-w-0">
               <h1 className="font-display text-2xl font-bold text-espresso">
-                {displayUser.displayName}
+                {user.display_name}
               </h1>
-              <div className="flex flex-wrap items-center gap-2 mt-1">
-                {displayUser.role === "toppertje" || displayUser.role === "admin" || displayUser.role === "superadmin" ? (
+              <div className="flex flex-wrap items-center gap-2 mt-2">
+                {isToppertjeLike ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-spritz/10 px-3 py-1 text-sm font-medium text-spritz">
-                    {displayUser.role === "admin" || displayUser.role === "superadmin" ? "Beheerder" : titleMap[displayUser.pronoun]}
+                    {user.role === "admin" || user.role === "superadmin"
+                      ? "Beheerder"
+                      : titleMap[user.pronoun]}
                   </span>
                 ) : (
                   <span className="text-sm text-espresso-light">
-                    {displayUser.approvedCount} / 5 plekjes tot Toppertje-status
+                    {user.approved_count} / 5 plekjes tot Toppertje
                   </span>
                 )}
-                {user && (
-                  <CityPicker
-                    userId={user.id}
-                    initialCityId={user.preferred_city_id ?? null}
-                    initialCityName={preferredCityName}
-                  />
+                <CityPicker
+                  userId={user.id}
+                  initialCityId={user.preferred_city_id ?? null}
+                  initialCityName={preferredCityName}
+                />
+                {smaakScore !== null && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-frisgroen/10 px-3 py-1 text-sm font-medium text-frisgroen">
+                    {smaakScore}% Lekker
+                  </span>
                 )}
                 <span className="text-xs text-espresso-light">
                   Lid sinds{" "}
-                  {new Date(displayUser.createdAt).toLocaleDateString("nl-NL", {
+                  {new Date(user.created_at).toLocaleDateString("nl-NL", {
                     month: "long",
                     year: "numeric",
                   })}
                 </span>
               </div>
+              <div className="mt-3">
+                <BioEditor userId={user.id} initialBio={user.bio ?? null} />
+              </div>
+              {smaakScore === null && smaakTotal > 0 && (
+                <p className="mt-2 text-xs text-espresso-light/70">
+                  Smaak-score zichtbaar vanaf 30 stemmen ({smaakTotal}/30)
+                </p>
+              )}
             </div>
           </div>
 
           {/* Progress bar for non-toppertjes */}
-          {displayUser.role === "user" && (
-            <div className="mb-8 rounded-xl bg-white border border-espresso/8 p-4">
+          {user.role === "user" && (
+            <div className="mb-8 rounded-xl bg-spritz/5 border border-spritz/15 p-4">
               <div className="flex justify-between text-sm mb-2">
                 <span className="font-medium text-espresso">
-                  Voortgang naar Toppertje
+                  {user.approved_count >= 5
+                    ? "Bijna! Wacht op de volgende goedkeuring 🎉"
+                    : `Nog ${5 - user.approved_count} goedgekeurde ${
+                        5 - user.approved_count === 1 ? "plekje" : "plekjes"
+                      } te gaan en je bent een ${titleMap[user.pronoun]}!`}
                 </span>
-                <span className="text-espresso-light">
-                  {displayUser.approvedCount}/5
-                </span>
+                <span className="text-espresso-light">{user.approved_count}/5</span>
               </div>
               <div className="h-2 rounded-full bg-espresso/5">
                 <div
                   className="h-2 rounded-full bg-spritz transition-all"
                   style={{
-                    width: `${Math.min((displayUser.approvedCount / 5) * 100, 100)}%`,
+                    width: `${Math.min((user.approved_count / 5) * 100, 100)}%`,
                   }}
                 />
               </div>
             </div>
           )}
 
-          {/* My plekjes */}
-          <h2 className="font-display text-xl font-semibold text-espresso mb-4">
-            Mijn plekjes
-          </h2>
-          {myPlekjes.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {myPlekjes.map((plekje: any) => (
-                <PlekjeCard key={plekje.id} {...plekje} />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-xl bg-white border border-espresso/8 p-8 text-center">
-              <p className="text-espresso-light">
-                Je hebt nog geen plekjes getipt. Begin met je eerste!
-              </p>
-            </div>
-          )}
+          {/* Tabs: Mijn plekjes / Opgeslagen / Wachtkamer */}
+          <ProfielTabs
+            published={myPublished.map(mapPlekje)}
+            saved={favoritePlekjes}
+            pending={myPending.map((l: any) => ({
+              id: l.id,
+              name: l.name,
+              neighborhood: l.neighborhood,
+              created_at: l.created_at,
+              status: l.status as "pending" | "rejected",
+            }))}
+            rejected={myRejected.map((l: any) => ({
+              id: l.id,
+              name: l.name,
+              neighborhood: l.neighborhood,
+              created_at: l.created_at,
+              status: l.status as "pending" | "rejected",
+            }))}
+          />
 
-          {/* Discrete logout */}
-          {user && (
-            <div className="mt-12 pt-6 border-t border-espresso/8 text-center">
-              <LogoutButton />
-            </div>
-          )}
+          {/* Settings + logout */}
+          <div className="mt-12 pt-6 border-t border-espresso/8 flex items-center justify-between">
+            <a
+              href="/profiel/instellingen"
+              className="text-xs text-espresso-light/70 hover:text-espresso transition-colors"
+            >
+              Profiel bewerken & instellingen
+            </a>
+            <LogoutButton />
+          </div>
         </div>
       </main>
       <Footer />
