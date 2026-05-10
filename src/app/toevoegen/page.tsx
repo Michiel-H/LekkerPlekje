@@ -221,7 +221,7 @@ export default function ToevoegenPage() {
           </h1>
           <p className="mt-2 text-espresso-light">
             Ken je een lekker plekje? Deel het met de rest! Kies de tags die
-            passen en schrijf er een korte motivatie bij.
+            passen zodat andere mensen weten wat ze hier kunnen doen.
           </p>
 
           {error && (
