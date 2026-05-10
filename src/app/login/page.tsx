@@ -20,19 +20,25 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+
+      router.push("/profiel");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || "Er is iets misgegaan.");
       setLoading(false);
-      return;
     }
-
-    router.push("/profiel");
   }
 
   return (
