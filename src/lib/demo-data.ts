@@ -5,7 +5,7 @@ export const DEMO_PLEKJES = [
     neighborhood: "Jordaan",
     imageUrl: null,
     tags: [
-      { emoji: "👯", name: "Met vrienden" },
+      { emoji: "👯", name: "Vrienden" },
       { emoji: "🍕", name: "Casual eten" },
       { emoji: "🍺", name: "Biertje doen" },
     ],
@@ -33,7 +33,7 @@ export const DEMO_PLEKJES = [
     tags: [
       { emoji: "☀️", name: "Terrasje pakken" },
       { emoji: "🍺", name: "Biertje doen" },
-      { emoji: "👯", name: "Met vrienden" },
+      { emoji: "👯", name: "Vrienden" },
     ],
     toppertjeName: "Jaap",
     toppertjeTitle: "Lekker ventje",
@@ -58,7 +58,7 @@ export const DEMO_PLEKJES = [
     imageUrl: null,
     tags: [
       { emoji: "🥞", name: "Ontbijt / brunch" },
-      { emoji: "👨‍👩‍👦", name: "Met je ouders" },
+      { emoji: "👨‍👩‍👦", name: "Je ouders" },
       { emoji: "☕", name: "Koffie" },
     ],
     toppertjeName: "Eva",

@@ -10,11 +10,11 @@ export interface TagOption {
 export const TAGS: TagOption[] = [
   // Gezelschap
   { name: "Date", slug: "date", emoji: "💕", category: "gezelschap" },
-  { name: "Met vrienden", slug: "met-vrienden", emoji: "👯", category: "gezelschap" },
-  { name: "Met je ouders", slug: "met-je-ouders", emoji: "👨‍👩‍👦", category: "gezelschap" },
+  { name: "Vrienden", slug: "met-vrienden", emoji: "👯", category: "gezelschap" },
+  { name: "Je ouders", slug: "met-je-ouders", emoji: "👨‍👩‍👦", category: "gezelschap" },
   { name: "Zakelijk", slug: "zakelijk", emoji: "💼", category: "gezelschap" },
   { name: "Groep (8+)", slug: "groep", emoji: "🎉", category: "gezelschap" },
-  { name: "Met collega's", slug: "met-collegas", emoji: "🏢", category: "gezelschap" },
+  { name: "Collega's", slug: "met-collegas", emoji: "🏢", category: "gezelschap" },
 
   // Activiteit (vibe)
   { name: "Biertje doen", slug: "biertje-doen", emoji: "🍺", category: "vibe" },

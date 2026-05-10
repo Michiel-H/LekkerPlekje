@@ -34,7 +34,7 @@ const PHASE_DURATIONS = [8000, 7500, 5000] as const; // sentence, tags, thumbs
 function AnimatedSentence({ isActive }: { isActive: boolean }) {
   const [step, setStep] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const words = ["activiteit?", "Biertje doen", "gezelschap?", "Met vrienden", "stad?", "Amsterdam"];
+  const words = ["activiteit?", "Biertje doen", "gezelschap?", "Vrienden", "stad?", "Amsterdam"];
 
   useEffect(() => {
     if (intervalRef.current) {
