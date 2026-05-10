@@ -113,6 +113,28 @@ export default function ToevoegenPage() {
       return;
     }
 
+    // Duplicate check — case-insensitive match on address
+    const { data: existing } = await supabase
+      .from("locations")
+      .select("id, name, status")
+      .ilike("address", address.trim())
+      .limit(1);
+
+    const existingRow = (existing as any[] | null)?.[0];
+    if (existingRow) {
+      const statusLabel =
+        existingRow.status === "published"
+          ? "staat al op de site"
+          : existingRow.status === "pending"
+          ? "is al ingestuurd en wacht op goedkeuring"
+          : "is eerder ingestuurd";
+      setError(
+        `Dit adres ${statusLabel} als "${existingRow.name}". Dubbele plekjes worden niet toegevoegd.`
+      );
+      setLoading(false);
+      return;
+    }
+
     // Upload photo
     const fileExt = photo.name.split(".").pop();
     const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
@@ -147,7 +169,12 @@ export default function ToevoegenPage() {
 
     const location = locationData as any;
     if (locationError || !location) {
-      setError(locationError?.message || "Kon het plekje niet opslaan.");
+      const isDuplicate = locationError?.code === "23505";
+      setError(
+        isDuplicate
+          ? "Dit adres staat al op LekkerPlekje. Dubbele plekjes worden niet toegevoegd."
+          : locationError?.message || "Kon het plekje niet opslaan."
+      );
       setLoading(false);
       return;
     }
