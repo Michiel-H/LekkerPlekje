@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 interface HeaderProps {
   isAdmin?: boolean;
@@ -9,6 +10,36 @@ interface HeaderProps {
 
 export default function Header({ isAdmin = false }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<{ displayName: string; initial: string } | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    async function getUser() {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) return;
+
+      const { data: profile } = await supabase
+        .from("users")
+        .select("display_name")
+        .eq("id", authUser.id)
+        .single();
+
+      if (profile) {
+        const name = (profile as any).display_name || "?";
+        setUser({ displayName: name, initial: name.charAt(0).toUpperCase() });
+      }
+    }
+
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") getUser();
+      if (event === "SIGNED_OUT") setUser(null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-creme/95 backdrop-blur-sm border-b border-espresso/10">
@@ -48,12 +79,24 @@ export default function Header({ isAdmin = false }: HeaderProps) {
                 Admin
               </Link>
             )}
-            <Link
-              href="/login"
-              className="inline-flex items-center rounded-full bg-espresso px-4 py-2 text-sm font-medium text-creme hover:bg-espresso-light transition-colors"
-            >
-              Inloggen
-            </Link>
+            {user ? (
+              <Link
+                href="/profiel"
+                className="inline-flex items-center gap-2 rounded-full bg-spritz/10 px-3 py-1.5 text-sm font-medium text-spritz hover:bg-spritz/20 transition-colors"
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-spritz text-xs font-bold text-white">
+                  {user.initial}
+                </span>
+                {user.displayName}
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="inline-flex items-center rounded-full bg-espresso px-4 py-2 text-sm font-medium text-creme hover:bg-espresso-light transition-colors"
+              >
+                Inloggen
+              </Link>
+            )}
           </nav>
 
           <button
@@ -117,13 +160,26 @@ export default function Header({ isAdmin = false }: HeaderProps) {
                 Admin
               </Link>
             )}
-            <Link
-              href="/login"
-              className="inline-flex w-fit items-center rounded-full bg-espresso px-4 py-2 text-sm font-medium text-creme"
-              onClick={() => setMenuOpen(false)}
-            >
-              Inloggen
-            </Link>
+            {user ? (
+              <Link
+                href="/profiel"
+                className="inline-flex w-fit items-center gap-2 rounded-full bg-spritz/10 px-3 py-1.5 text-sm font-medium text-spritz"
+                onClick={() => setMenuOpen(false)}
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-spritz text-xs font-bold text-white">
+                  {user.initial}
+                </span>
+                {user.displayName}
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="inline-flex w-fit items-center rounded-full bg-espresso px-4 py-2 text-sm font-medium text-creme"
+                onClick={() => setMenuOpen(false)}
+              >
+                Inloggen
+              </Link>
+            )}
           </nav>
         )}
       </div>
