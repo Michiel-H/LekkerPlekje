@@ -8,6 +8,7 @@ interface UserProfile {
   role: UserRole;
   approved_count: number;
   created_at: string;
+  preferred_city_id?: string | null;
 }
 
 export async function getCurrentUser(): Promise<UserProfile | null> {

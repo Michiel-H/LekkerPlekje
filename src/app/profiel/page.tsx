@@ -4,6 +4,7 @@ import PlekjeCard from "@/components/PlekjeCard";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "./LogoutButton";
+import CityPicker from "./CityPicker";
 
 export default async function ProfielPage() {
   const user = await getCurrentUser();
@@ -30,6 +31,18 @@ export default async function ProfielPage() {
         approvedCount: 0,
         createdAt: new Date().toISOString(),
       };
+
+  // Fetch preferred city name (if any)
+  let preferredCityName: string | null = null;
+  if (user?.preferred_city_id) {
+    const supabase = await createClient();
+    const { data: city } = await supabase
+      .from("cities")
+      .select("name")
+      .eq("id", user.preferred_city_id)
+      .single();
+    preferredCityName = (city as any)?.name ?? null;
+  }
 
   let myPlekjes: any[] = [];
 
@@ -84,7 +97,7 @@ export default async function ProfielPage() {
               <h1 className="font-display text-2xl font-bold text-espresso">
                 {displayUser.displayName}
               </h1>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex flex-wrap items-center gap-2 mt-1">
                 {displayUser.role === "toppertje" || displayUser.role === "admin" || displayUser.role === "superadmin" ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-spritz/10 px-3 py-1 text-sm font-medium text-spritz">
                     {displayUser.role === "admin" || displayUser.role === "superadmin" ? "Beheerder" : titleMap[displayUser.pronoun]}
@@ -93,6 +106,13 @@ export default async function ProfielPage() {
                   <span className="text-sm text-espresso-light">
                     {displayUser.approvedCount} / 5 plekjes tot Toppertje-status
                   </span>
+                )}
+                {user && (
+                  <CityPicker
+                    userId={user.id}
+                    initialCityId={user.preferred_city_id ?? null}
+                    initialCityName={preferredCityName}
+                  />
                 )}
                 <span className="text-xs text-espresso-light">
                   Lid sinds{" "}

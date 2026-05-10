@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import Link from "next/link";
+
+interface City {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+}
 
 export default function RegistrerenPage() {
   const router = useRouter();
@@ -17,8 +24,21 @@ export default function RegistrerenPage() {
   const [pronoun, setPronoun] = useState<"vent" | "griet" | "neutraal">(
     "neutraal"
   );
+  const [preferredCityId, setPreferredCityId] = useState("");
+  const [cities, setCities] = useState<City[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("cities")
+        .select("id, name, slug, status")
+        .eq("status", "live")
+        .order("name");
+      if (data) setCities(data as City[]);
+    })();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,7 +46,7 @@ export default function RegistrerenPage() {
     setLoading(true);
 
     try {
-      const { error: authError } = await supabase.auth.signUp({
+      const { data: signUpData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -38,6 +58,14 @@ export default function RegistrerenPage() {
       });
 
       if (authError) throw authError;
+
+      // Save preferred city after signup if chosen
+      if (preferredCityId && signUpData.user) {
+        await supabase
+          .from("users")
+          .update({ preferred_city_id: preferredCityId } as never)
+          .eq("id", signUpData.user.id);
+      }
 
       router.push("/profiel");
       router.refresh();
@@ -138,6 +166,27 @@ export default function RegistrerenPage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-espresso mb-1.5">
+                Stad van voorkeur <span className="text-espresso-light/70 font-normal">(optioneel)</span>
+              </label>
+              <select
+                value={preferredCityId}
+                onChange={(e) => setPreferredCityId(e.target.value)}
+                className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso focus:outline-none focus:ring-2 focus:ring-spritz/50"
+              >
+                <option value="">Geen voorkeur</option>
+                {cities.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-espresso-light">
+                Op de homepage zie je dan plekjes uit jouw stad eerst.
+              </p>
             </div>
 
             <Button type="submit" size="lg" className="w-full" disabled={loading}>

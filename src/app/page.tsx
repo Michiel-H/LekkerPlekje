@@ -3,11 +3,15 @@ import Footer from "@/components/Footer";
 import MadLibsSearch from "@/components/MadLibsSearch";
 import PlekjeCard from "@/components/PlekjeCard";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 
 export default async function Home() {
   const supabase = await createClient();
+  const currentUser = await getCurrentUser();
 
-  const { data: locations } = await supabase
+  // If user has a preferred city, scope homepage to that city
+  let preferredCityName: string | null = null;
+  let query = supabase
     .from("locations")
     .select(`
       id,
@@ -15,6 +19,7 @@ export default async function Home() {
       neighborhood,
       image_url,
       submitted_by,
+      city_id,
       location_tags (
         tags (
           name,
@@ -29,6 +34,18 @@ export default async function Home() {
     `)
     .eq("status", "published")
     .limit(6);
+
+  if (currentUser?.preferred_city_id) {
+    query = query.eq("city_id", currentUser.preferred_city_id);
+    const { data: city } = await supabase
+      .from("cities")
+      .select("name")
+      .eq("id", currentUser.preferred_city_id)
+      .single();
+    preferredCityName = (city as any)?.name ?? null;
+  }
+
+  const { data: locations } = await query;
 
   const titleMap: Record<string, string> = {
     vent: "Lekker ventje",
@@ -82,10 +99,12 @@ export default async function Home() {
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-10">
               <h2 className="font-display text-2xl sm:text-3xl font-bold text-espresso">
-                Ontdekt door locals
+                {preferredCityName ? `Ontdekt door locals in ${preferredCityName}` : "Ontdekt door locals"}
               </h2>
               <p className="mt-2 text-espresso-light">
-                De lekkerste plekjes van Amsterdam, getipt door onze Toppertjes.
+                {preferredCityName
+                  ? `Plekjes uit jouw voorkeurstad. Pas hem aan op je profiel of zoek hieronder voor andere steden.`
+                  : "De lekkerste plekjes, getipt door onze Toppertjes."}
               </p>
             </div>
 
