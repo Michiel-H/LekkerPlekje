@@ -72,6 +72,7 @@ export default function Header({ isAdmin = false }: HeaderProps) {
             </Link>
             <Link
               href="/toevoegen"
+              prefetch={false}
               className="text-sm font-medium text-spritz hover:text-spritz-hover transition-colors"
             >
               + Plekje toevoegen
@@ -87,6 +88,7 @@ export default function Header({ isAdmin = false }: HeaderProps) {
             {user ? (
               <Link
                 href="/profiel"
+                prefetch={false}
                 className="inline-flex items-center gap-2 rounded-full bg-spritz/10 px-3 py-1.5 text-sm font-medium text-spritz hover:bg-spritz/20 transition-colors"
               >
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-spritz text-xs font-bold text-white">
@@ -151,6 +153,7 @@ export default function Header({ isAdmin = false }: HeaderProps) {
             </Link>
             <Link
               href="/toevoegen"
+              prefetch={false}
               className="text-sm font-medium text-spritz hover:text-spritz-hover"
               onClick={() => setMenuOpen(false)}
             >
@@ -168,6 +171,7 @@ export default function Header({ isAdmin = false }: HeaderProps) {
             {user ? (
               <Link
                 href="/profiel"
+                prefetch={false}
                 className="inline-flex w-fit items-center gap-2 rounded-full bg-spritz/10 px-3 py-1.5 text-sm font-medium text-spritz"
                 onClick={() => setMenuOpen(false)}
               >

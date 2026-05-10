@@ -41,6 +41,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/toevoegen"
+                  prefetch={false}
                   className="text-sm text-espresso-light hover:text-spritz transition-colors"
                 >
                   Plekje toevoegen
