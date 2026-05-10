@@ -183,11 +183,11 @@ export default function ToevoegenPage() {
         <Header />
         <main className="flex-1 px-4 py-16 text-center">
           <h1 className="font-display text-2xl font-bold text-espresso">
-            Bedankt voor je tip!
+            Dankjewel topper! 🎉
           </h1>
           <p className="mt-2 text-espresso-light max-w-md mx-auto">
-            We checken je plekje en zetten het zo snel mogelijk live. Nog 5
-            goedgekeurde plekjes en je bent een Toppertje!
+            Je lekkere plekje is succesvol toegevoegd. Bekijk je voortgang naar
+            Toppertje op je profiel!
           </p>
           <Button
             className="mt-6"
