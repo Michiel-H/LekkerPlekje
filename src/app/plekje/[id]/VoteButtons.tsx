@@ -119,28 +119,41 @@ export default function VoteButtons({
     }
   }
 
+  const total = lekkerCount + nietLekkerCount;
+  const lekkerPct = total > 0 ? (lekkerCount / total) * 100 : 0;
+
   return (
-    <div className="flex items-center gap-2">
-      <button
-        onClick={() => handleVote("up")}
-        className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
-          vote === "up"
-            ? "bg-frisgroen text-white"
-            : "bg-frisgroen/10 text-frisgroen hover:bg-frisgroen/20"
-        }`}
-      >
-        Lekker {lekkerCount}
-      </button>
-      <button
-        onClick={() => handleVote("down")}
-        className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
-          vote === "down"
-            ? "bg-koraal text-white"
-            : "bg-koraal/10 text-koraal hover:bg-koraal/20"
-        }`}
-      >
-        Niet lekker {nietLekkerCount}
-      </button>
+    <div className="flex flex-col gap-2 w-full">
+      <div className="flex items-center justify-end gap-2">
+        <button
+          onClick={() => handleVote("up")}
+          className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
+            vote === "up"
+              ? "bg-frisgroen text-white"
+              : "bg-frisgroen/10 text-frisgroen hover:bg-frisgroen/20"
+          }`}
+        >
+          Lekker {lekkerCount}
+        </button>
+        <button
+          onClick={() => handleVote("down")}
+          className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
+            vote === "down"
+              ? "bg-koraal text-white"
+              : "bg-koraal/10 text-koraal hover:bg-koraal/20"
+          }`}
+        >
+          Niet lekker {nietLekkerCount}
+        </button>
+      </div>
+      {total > 0 && (
+        <div className="h-2 rounded-full bg-koraal/30 overflow-hidden">
+          <div
+            className="h-full bg-frisgroen transition-all duration-500"
+            style={{ width: `${lekkerPct}%` }}
+          />
+        </div>
+      )}
     </div>
   );
 }

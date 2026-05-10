@@ -161,27 +161,18 @@ export default async function PlekjeDetailPage({ params }: Props) {
                   key={tag.name}
                   className="rounded-xl bg-white border border-espresso/8 p-4"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-espresso">
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="font-medium text-espresso pt-1.5">
                       {tag.name}
                     </span>
-                    <VoteButtons
-                      locationTagId={tag.locationTagId}
-                      initialLekker={tag.lekkerCount}
-                      initialNietLekker={tag.nietLekkerCount}
-                    />
-                  </div>
-                  {/* Percentage bar */}
-                  {(tag.lekkerCount + tag.nietLekkerCount) > 0 && (
-                    <div className="h-2 rounded-full bg-koraal/20 overflow-hidden">
-                      <div
-                        className="h-2 rounded-full bg-frisgroen transition-all"
-                        style={{
-                          width: `${(tag.lekkerCount / (tag.lekkerCount + tag.nietLekkerCount)) * 100}%`,
-                        }}
+                    <div className="flex-1 max-w-md">
+                      <VoteButtons
+                        locationTagId={tag.locationTagId}
+                        initialLekker={tag.lekkerCount}
+                        initialNietLekker={tag.nietLekkerCount}
                       />
                     </div>
-                  )}
+                  </div>
                 </div>
               ))}
             </div>
