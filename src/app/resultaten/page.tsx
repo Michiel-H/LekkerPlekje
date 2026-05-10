@@ -1,7 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PlekjeCard from "@/components/PlekjeCard";
-import { DEMO_PLEKJES } from "@/lib/demo-data";
 import { TAGS } from "@/lib/tags";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
@@ -136,16 +135,6 @@ export default async function ResultatenPage({ searchParams }: Props) {
     }
   }
 
-  // Fall back to demo data if no real results
-  if (results.length === 0) {
-    const filtered = DEMO_PLEKJES.filter((plekje) =>
-      tagDetails.some((tag) =>
-        plekje.tags.some((pt) => pt.name === tag.name)
-      )
-    );
-    results = filtered.length > 0 ? filtered : DEMO_PLEKJES;
-  }
-
   return (
     <>
       <Header />
@@ -206,11 +195,22 @@ export default async function ResultatenPage({ searchParams }: Props) {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {results.map((plekje: any) => (
-              <PlekjeCard key={plekje.id} {...plekje} />
-            ))}
-          </div>
+          {results.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {results.map((plekje: any) => (
+                <PlekjeCard key={plekje.id} {...plekje} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-white border border-espresso/8 p-12 text-center">
+              <p className="font-display text-lg font-semibold text-espresso">
+                Nog geen plekjes gevonden
+              </p>
+              <p className="mt-2 text-sm text-espresso-light">
+                Er zijn nog geen plekjes die matchen met je zoekopdracht. Wees de eerste!
+              </p>
+            </div>
+          )}
         </div>
       </main>
       <Footer />

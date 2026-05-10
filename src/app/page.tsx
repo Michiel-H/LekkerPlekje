@@ -2,7 +2,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MadLibsSearch from "@/components/MadLibsSearch";
 import PlekjeCard from "@/components/PlekjeCard";
-import { DEMO_PLEKJES } from "@/lib/demo-data";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -54,7 +53,7 @@ export default async function Home() {
               ? titleMap[loc.users?.pronoun || "neutraal"]
               : undefined,
         }))
-      : DEMO_PLEKJES;
+      : [];
 
   return (
     <>
@@ -90,11 +89,22 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {plekjes.map((plekje: any) => (
-                <PlekjeCard key={plekje.id} {...plekje} />
-              ))}
-            </div>
+            {plekjes.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {plekjes.map((plekje: any) => (
+                  <PlekjeCard key={plekje.id} {...plekje} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-white border border-espresso/8 p-12 text-center max-w-lg mx-auto">
+                <p className="font-display text-lg font-semibold text-espresso">
+                  Nog geen plekjes getipt
+                </p>
+                <p className="mt-2 text-sm text-espresso-light">
+                  Word de eerste die een lekker plekje deelt met de community!
+                </p>
+              </div>
+            )}
           </div>
         </section>
 

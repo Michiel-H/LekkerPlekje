@@ -1,7 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PlekjeCard from "@/components/PlekjeCard";
-import { DEMO_PLEKJES } from "@/lib/demo-data";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,7 +13,7 @@ export default async function ProfielPage() {
     neutraal: "Toppertje",
   };
 
-  // If no user, show demo data
+  // Middleware redirects to /login if not authed, but handle gracefully
   const displayUser = user
     ? {
         displayName: user.display_name,
@@ -24,11 +23,11 @@ export default async function ProfielPage() {
         createdAt: user.created_at,
       }
     : {
-        displayName: "Patrick",
-        pronoun: "vent" as const,
-        role: "toppertje" as const,
-        approvedCount: 7,
-        createdAt: "2026-04-01",
+        displayName: "Gast",
+        pronoun: "neutraal" as const,
+        role: "user" as const,
+        approvedCount: 0,
+        createdAt: new Date().toISOString(),
       };
 
   let myPlekjes: any[] = [];
@@ -68,8 +67,6 @@ export default async function ProfielPage() {
             : undefined,
       }));
     }
-  } else {
-    myPlekjes = DEMO_PLEKJES.filter((p) => p.toppertjeName === "Patrick");
   }
 
   return (

@@ -1,6 +1,5 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { DEMO_PLEKJES } from "@/lib/demo-data";
 import Link from "next/link";
 import VoteButtons from "./VoteButtons";
 import { createClient } from "@/lib/supabase/server";
@@ -67,11 +66,6 @@ export default async function PlekjeDetailPage({ params }: Props) {
             : undefined,
       };
     }
-  }
-
-  // Fall back to demo data
-  if (!plekje) {
-    plekje = DEMO_PLEKJES.find((p) => p.id === id) || null;
   }
 
   if (!plekje) {
