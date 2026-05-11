@@ -25,9 +25,9 @@ export default function HeaderClient({ user, isAdmin }: Props) {
           <Link href="/" className="flex items-center" aria-label="LekkerPlekje">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo.png"
+              src="/logo.png?v=2"
               alt="LekkerPlekje"
-              className="h-8 w-auto"
+              className="h-10 w-auto"
             />
           </Link>
 
