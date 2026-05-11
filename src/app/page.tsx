@@ -94,8 +94,7 @@ export default async function Home() {
               Vind het lekkerste plekje
             </h1>
             <p className="mt-4 text-lg text-espresso-light max-w-xl mx-auto">
-              Geen sterren. Geen lange recensies. Gewoon goeie tips voor het
-              juiste plekje op het juiste moment.
+              Vul de zin hieronder aan en ontdek meteen een lekker plekje dat past bij jouw moment.
             </p>
           </div>
 
