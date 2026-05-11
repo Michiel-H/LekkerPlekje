@@ -83,11 +83,20 @@ export default function HeaderClient({ user, isAdmin }: Props) {
             )}
           </nav>
 
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 text-espresso"
-            aria-label="Menu"
-          >
+          {/* Mobile-only persistent CTA so users can always submit a plekje */}
+          <div className="md:hidden flex items-center gap-2">
+            <Link
+              href="/toevoegen"
+              prefetch={false}
+              className="inline-flex items-center rounded-full bg-spritz px-3 py-1.5 text-xs font-semibold text-white hover:bg-spritz-hover transition-colors"
+            >
+              + Plekje
+            </Link>
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="p-2 text-espresso"
+              aria-label="Menu"
+            >
             <svg
               className="h-6 w-6"
               fill="none"
@@ -109,7 +118,8 @@ export default function HeaderClient({ user, isAdmin }: Props) {
                 />
               )}
             </svg>
-          </button>
+            </button>
+          </div>
         </div>
 
         {menuOpen && (
@@ -122,14 +132,6 @@ export default function HeaderClient({ user, isAdmin }: Props) {
               Hoe het werkt
             </Link>
             <CitiesMenu mobile />
-            <Link
-              href="/toevoegen"
-              prefetch={false}
-              className="text-sm font-medium text-spritz hover:text-spritz-hover"
-              onClick={() => setMenuOpen(false)}
-            >
-              + Plekje toevoegen
-            </Link>
             {isAdmin && (
               <Link
                 href="/admin"
