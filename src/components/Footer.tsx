@@ -7,13 +7,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           {/* Over */}
           <div>
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-xl font-display font-bold text-spritz">LP</span>
-              <span className="font-display text-lg font-semibold text-espresso">
-                LekkerPlekje
-              </span>
+            <Link href="/" className="flex items-center" aria-label="LekkerPlekje">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="LekkerPlekje" className="h-7 w-auto" />
             </Link>
-            <p className="mt-2 text-sm text-espresso-light">
+            <p className="mt-3 text-sm text-espresso-light">
               Geen sterren. Geen lange recensies.
               <br />
               Gewoon goeie tips voor het juiste plekje.

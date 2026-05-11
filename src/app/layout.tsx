@@ -18,6 +18,24 @@ export const metadata: Metadata = {
   title: "LekkerPlekje.nl — Vind het lekkerste plekje voor elk moment",
   description:
     "Geen sterren, geen lange recensies. Gewoon goeie tips voor het juiste plekje op het juiste moment.",
+  icons: {
+    icon: "/logo-icon.png",
+    apple: "/logo-icon.png",
+  },
+  openGraph: {
+    title: "LekkerPlekje.nl — Vind het lekkerste plekje voor elk moment",
+    description:
+      "Geen sterren, geen lange recensies. Gewoon goeie tips voor het juiste plekje.",
+    images: [{ url: "/logo.png", width: 1500, height: 500, alt: "LekkerPlekje" }],
+    type: "website",
+    locale: "nl_NL",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LekkerPlekje.nl",
+    description: "Geen sterren. Gewoon goeie tips.",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({

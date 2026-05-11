@@ -22,11 +22,13 @@ export default function HeaderClient({ user, isAdmin }: Props) {
     <header className="sticky top-0 z-50 bg-creme/95 backdrop-blur-sm border-b border-espresso/10">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-display font-bold text-spritz">LP</span>
-            <span className="font-display text-xl font-semibold text-espresso">
-              LekkerPlekje
-            </span>
+          <Link href="/" className="flex items-center" aria-label="LekkerPlekje">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.png"
+              alt="LekkerPlekje"
+              className="h-8 w-auto"
+            />
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
