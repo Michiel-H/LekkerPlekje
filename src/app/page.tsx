@@ -203,6 +203,7 @@ export default async function Home() {
                 "Den Haag",
                 "Groningen",
                 "Leiden",
+                "Delft",
                 "Zwolle",
               ].map((city) => {
                 const slug = city.toLowerCase().replace(/ /g, "-");
@@ -223,7 +224,6 @@ export default async function Home() {
             </h3>
             <div className="flex flex-wrap justify-center gap-2">
               {[
-                "Delft",
                 "Eindhoven",
                 "Enschede",
                 "Wageningen",

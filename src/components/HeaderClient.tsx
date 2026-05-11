@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import CitiesMenu from "./CitiesMenu";
 
 export interface HeaderUser {
   displayName: string;
@@ -30,17 +31,12 @@ export default function HeaderClient({ user, isAdmin }: Props) {
 
           <nav className="hidden md:flex items-center gap-6">
             <Link
-              href="/amsterdam"
-              className="text-sm font-medium text-espresso-light hover:text-espresso transition-colors"
-            >
-              Amsterdam
-            </Link>
-            <Link
               href="/hoe-het-werkt"
-              className="text-sm font-medium text-espresso-light hover:text-espresso transition-colors"
+              className="text-sm font-semibold text-espresso hover:text-spritz transition-colors"
             >
               Hoe het werkt
             </Link>
+            <CitiesMenu />
             <Link
               href="/toevoegen"
               prefetch={false}
@@ -117,19 +113,13 @@ export default function HeaderClient({ user, isAdmin }: Props) {
         {menuOpen && (
           <nav className="md:hidden pb-4 flex flex-col gap-3">
             <Link
-              href="/amsterdam"
-              className="text-sm font-medium text-espresso-light hover:text-espresso"
-              onClick={() => setMenuOpen(false)}
-            >
-              Amsterdam
-            </Link>
-            <Link
               href="/hoe-het-werkt"
-              className="text-sm font-medium text-espresso-light hover:text-espresso"
+              className="text-sm font-semibold text-espresso hover:text-spritz"
               onClick={() => setMenuOpen(false)}
             >
               Hoe het werkt
             </Link>
+            <CitiesMenu mobile />
             <Link
               href="/toevoegen"
               prefetch={false}
