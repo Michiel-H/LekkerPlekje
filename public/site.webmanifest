@@ -1,0 +1,14 @@
+{
+  "name": "LekkerPlekje",
+  "short_name": "LekkerPlekje",
+  "description": "Vind het lekkerste plekje voor elk moment.",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "theme_color": "#FF7E67",
+  "background_color": "#FDFBF7",
+  "display": "standalone",
+  "start_url": "/",
+  "lang": "nl"
+}

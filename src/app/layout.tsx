@@ -19,9 +19,13 @@ export const metadata: Metadata = {
   description:
     "Geen sterren, geen lange recensies. Gewoon goeie tips voor het juiste plekje op het juiste moment.",
   icons: {
-    icon: "/logo-icon.png",
-    apple: "/logo-icon.png",
+    icon: [
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
   },
+  manifest: "/site.webmanifest",
   openGraph: {
     title: "LekkerPlekje.nl — Vind het lekkerste plekje voor elk moment",
     description:
