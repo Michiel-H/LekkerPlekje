@@ -38,24 +38,61 @@ export default function RegisterForm() {
     })();
   }, []);
 
+  function validateUsername(name: string): string | null {
+    const trimmed = name.trim();
+    if (trimmed.length < 3) return "Gebruikersnaam moet minimaal 3 tekens zijn.";
+    if (trimmed.length > 24) return "Gebruikersnaam mag maximaal 24 tekens zijn.";
+    if (!/^[a-zA-Z0-9_-]+$/.test(trimmed))
+      return "Alleen letters, cijfers, _ en - zijn toegestaan.";
+    return null;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
+      const usernameError = validateUsername(displayName);
+      if (usernameError) {
+        setError(usernameError);
+        setLoading(false);
+        return;
+      }
+
+      // Check if username already exists (case-insensitive)
+      const { data: existing } = await supabase
+        .from("users")
+        .select("id")
+        .ilike("display_name", displayName.trim())
+        .limit(1);
+      if (existing && existing.length > 0) {
+        setError("Deze gebruikersnaam is al in gebruik. Kies een andere.");
+        setLoading(false);
+        return;
+      }
+
       const { data: signUpData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            display_name: displayName,
+            display_name: displayName.trim(),
             pronoun,
           },
         },
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        // DB-level uniqueness collision (race condition) — friendlier message
+        if (authError.message?.toLowerCase().includes("unique") || authError.code === "23505") {
+          setError("Deze gebruikersnaam is al in gebruik. Kies een andere.");
+        } else {
+          throw authError;
+        }
+        setLoading(false);
+        return;
+      }
 
       // Save preferred city after signup if chosen
       if (preferredCityId && signUpData.user) {
@@ -95,16 +132,19 @@ export default function RegisterForm() {
             
             <div>
               <label className="block text-sm font-medium text-espresso mb-1.5">
-                Naam
+                Gebruikersnaam
               </label>
               <input
                 type="text"
                 required
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Hoe wil je heten?"
+                placeholder="Kies een unieke naam"
                 className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 focus:ring-spritz/50"
               />
+              <p className="mt-1 text-xs text-espresso-light">
+                3–24 tekens. Letters, cijfers, _ en -. Hiermee word je herkend op de site.
+              </p>
             </div>
 
             <div>
@@ -138,14 +178,14 @@ export default function RegisterForm() {
 
             <div>
               <label className="block text-sm font-medium text-espresso mb-2">
-                Hoe wil je genoemd worden als Toppertje?
+                Geslacht
               </label>
               <div className="flex gap-2">
                 {(
                   [
-                    { value: "vent", label: "Lekker ventje" },
-                    { value: "griet", label: "Lekker grietje" },
-                    { value: "neutraal", label: "Toppertje" },
+                    { value: "vent", label: "Man" },
+                    { value: "griet", label: "Vrouw" },
+                    { value: "neutraal", label: "Anders" },
                   ] as const
                 ).map((option) => (
                   <button
