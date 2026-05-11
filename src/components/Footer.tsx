@@ -5,6 +5,7 @@ export default function Footer() {
     <footer className="mt-auto border-t border-espresso/10 bg-creme">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+          {/* Over */}
           <div>
             <Link href="/" className="flex items-center gap-2">
               <span className="text-xl font-display font-bold text-spritz">LP</span>
@@ -19,17 +20,10 @@ export default function Footer() {
             </p>
           </div>
 
+          {/* Ontdek */}
           <div>
             <h3 className="text-sm font-semibold text-espresso">Ontdek</h3>
             <ul className="mt-3 space-y-2">
-              <li>
-                <Link
-                  href="/amsterdam"
-                  className="text-sm text-espresso-light hover:text-spritz transition-colors"
-                >
-                  Amsterdam
-                </Link>
-              </li>
               <li>
                 <Link
                   href="/hoe-het-werkt"
@@ -50,15 +44,16 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Klein lettertje */}
           <div>
-            <h3 className="text-sm font-semibold text-espresso">Info</h3>
+            <h3 className="text-sm font-semibold text-espresso">Klein lettertje</h3>
             <ul className="mt-3 space-y-2">
               <li>
                 <Link
                   href="/privacy"
                   className="text-sm text-espresso-light hover:text-spritz transition-colors"
                 >
-                  Privacy
+                  Privacyverklaring
                 </Link>
               </li>
               <li>
@@ -66,16 +61,49 @@ export default function Footer() {
                   href="/voorwaarden"
                   className="text-sm text-espresso-light hover:text-spritz transition-colors"
                 >
-                  Voorwaarden
+                  Algemene voorwaarden
                 </Link>
+              </li>
+              <li>
+                <Link
+                  href="/meldingen"
+                  className="text-sm text-espresso-light hover:text-spritz transition-colors"
+                >
+                  Meldingen & klachten
+                </Link>
+              </li>
+              <li>
+                <a
+                  href="mailto:contact@lekkerplekje.nl"
+                  className="text-sm text-espresso-light hover:text-spritz transition-colors"
+                >
+                  Contact
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-8 border-t border-espresso/10 pt-6 text-center text-xs text-espresso-light">
-          &copy; {new Date().getFullYear()} LekkerPlekje.nl — Gemaakt in
-          Amsterdam
+        {/* Bedrijfsgegevens */}
+        <div className="mt-8 border-t border-espresso/10 pt-6 text-center text-xs text-espresso-light space-y-1">
+          <p>
+            &copy; {new Date().getFullYear()} LekkerPlekje.nl
+            {" · "}
+            KvK <span className="text-espresso-light/60">[in aanvraag]</span>
+            {" · "}
+            BTW <span className="text-espresso-light/60">[in aanvraag]</span>
+          </p>
+          <p>
+            <a
+              href="mailto:contact@lekkerplekje.nl"
+              className="hover:text-spritz transition-colors"
+            >
+              contact@lekkerplekje.nl
+            </a>
+          </p>
+          <p className="text-espresso-light/70">
+            Gemaakt in Nederland ♥ door mensen die ook gewoon een leuk terras zoeken.
+          </p>
         </div>
       </div>
     </footer>
