@@ -198,22 +198,12 @@ export default async function Home() {
             <div className="flex flex-wrap justify-center gap-3">
               {[
                 "Amsterdam",
+                "Rotterdam",
                 "Utrecht",
+                "Den Haag",
                 "Groningen",
                 "Leiden",
-                "Rotterdam",
-                "Delft",
-                "Enschede",
-                "Wageningen",
-                "Eindhoven",
-                "Tilburg",
-                "Nijmegen",
-                "Maastricht",
-                "Den Haag",
                 "Zwolle",
-                "Breda",
-                "Leeuwarden",
-                "Haarlem",
               ].map((city) => {
                 const slug = city.toLowerCase().replace(/ /g, "-");
                 return (
@@ -226,6 +216,32 @@ export default async function Home() {
                   </a>
                 );
               })}
+            </div>
+
+            <h3 className="mt-12 font-display text-lg font-semibold text-espresso mb-4">
+              Binnenkort ook in
+            </h3>
+            <div className="flex flex-wrap justify-center gap-2">
+              {[
+                "Delft",
+                "Eindhoven",
+                "Enschede",
+                "Wageningen",
+                "Tilburg",
+                "Nijmegen",
+                "Maastricht",
+                "Breda",
+                "Leeuwarden",
+                "Haarlem",
+              ].map((city) => (
+                <span
+                  key={city}
+                  className="inline-flex items-center rounded-full bg-espresso/5 px-4 py-1.5 text-xs font-medium text-espresso-light/70"
+                >
+                  {city}
+                  <span className="ml-1.5 opacity-50">coming soon</span>
+                </span>
+              ))}
             </div>
           </div>
         </section>
