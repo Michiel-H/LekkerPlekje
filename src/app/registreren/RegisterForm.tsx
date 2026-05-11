@@ -19,6 +19,7 @@ export default function RegisterForm() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [pronoun, setPronoun] = useState<"vent" | "griet" | "neutraal">(
     "neutraal"
   );
@@ -56,6 +57,12 @@ export default function RegisterForm() {
       const usernameError = validateUsername(displayName);
       if (usernameError) {
         setError(usernameError);
+        setLoading(false);
+        return;
+      }
+
+      if (password !== passwordConfirm) {
+        setError("Wachtwoorden komen niet overeen.");
         setLoading(false);
         return;
       }
@@ -174,6 +181,30 @@ export default function RegisterForm() {
                 placeholder="Minimaal 8 tekens"
                 className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 focus:ring-spritz/50"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-espresso mb-1.5">
+                Wachtwoord bevestigen
+              </label>
+              <input
+                type="password"
+                required
+                minLength={8}
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                placeholder="Herhaal je wachtwoord"
+                className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 ${
+                  passwordConfirm && password !== passwordConfirm
+                    ? "border-koraal focus:ring-koraal/50"
+                    : "border-espresso/15 focus:ring-spritz/50"
+                }`}
+              />
+              {passwordConfirm && password !== passwordConfirm && (
+                <p className="mt-1 text-xs text-koraal">
+                  Wachtwoorden komen niet overeen.
+                </p>
+              )}
             </div>
 
             <div>
