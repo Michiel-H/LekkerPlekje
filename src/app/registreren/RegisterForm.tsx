@@ -143,7 +143,7 @@ export default function RegisterForm() {
                 className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 focus:ring-spritz/50"
               />
               <p className="mt-1 text-xs text-espresso-light">
-                3–24 tekens. Letters, cijfers, _ en -. Hiermee word je herkend op de site.
+                3–24 tekens
               </p>
             </div>
 
