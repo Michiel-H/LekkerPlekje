@@ -9,6 +9,9 @@ interface PlekjeCardProps {
   tags: { emoji: string; name: string }[];
   toppertjeName?: string;
   toppertjeTitle?: string;
+  /** Pass-through to FavoriteButton to avoid per-card auth/favorites round trip */
+  initialFavorited?: boolean;
+  currentUserId?: string | null;
 }
 
 export default function PlekjeCard({
@@ -19,6 +22,8 @@ export default function PlekjeCard({
   tags,
   toppertjeName,
   toppertjeTitle,
+  initialFavorited,
+  currentUserId,
 }: PlekjeCardProps) {
   return (
     <Link
@@ -38,7 +43,12 @@ export default function PlekjeCard({
           </div>
         )}
         <div className="absolute top-2 right-2">
-          <FavoriteButton locationId={id} size="sm" />
+          <FavoriteButton
+            locationId={id}
+            size="sm"
+            initialFavorited={initialFavorited}
+            currentUserId={currentUserId}
+          />
         </div>
       </div>
 

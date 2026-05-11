@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { sanitizeLike } from "@/lib/utils";
 
 interface Location {
   id: string;
@@ -58,11 +59,12 @@ export default function LocatiesTable() {
         .range(pageIdx * PAGE_SIZE, pageIdx * PAGE_SIZE + PAGE_SIZE - 1);
 
       if (statusFilter !== "all") query = query.eq("status", statusFilter);
-      if (search.trim()) query = query.or(
-        `name.ilike.%${search.trim()}%,address.ilike.%${search.trim()}%`
-      );
-      if (neighborhoodFilter.trim())
-        query = query.ilike("neighborhood", `%${neighborhoodFilter.trim()}%`);
+      const term = sanitizeLike(search.trim());
+      if (term) {
+        query = query.or(`name.ilike.%${term}%,address.ilike.%${term}%`);
+      }
+      const nbh = sanitizeLike(neighborhoodFilter.trim());
+      if (nbh) query = query.ilike("neighborhood", `%${nbh}%`);
 
       const { data } = await query;
       const rows = (data as Location[] | null) ?? [];

@@ -4,6 +4,8 @@ import PlekjeCard from "@/components/PlekjeCard";
 import { TAGS } from "@/lib/tags";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
+import { getFavoritedSet } from "@/lib/favorites";
 
 interface Props {
   searchParams: Promise<{ gezelschap?: string; vibe?: string; stad?: string }>;
@@ -18,7 +20,7 @@ export default async function ResultatenPage({ searchParams }: Props) {
     (slug) => TAGS.find((t) => t.slug === slug)!
   ).filter(Boolean);
 
-  const supabase = await createClient();
+  const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
 
   const titleMap: Record<string, string> = {
     vent: "Lekker ventje",
@@ -133,6 +135,19 @@ export default async function ResultatenPage({ searchParams }: Props) {
             : undefined,
       }));
     }
+  }
+
+  // Batch favorites lookup across all displayed results (after both branches)
+  {
+    const favoritedSet = await getFavoritedSet(
+      currentUser?.id ?? null,
+      results.map((r) => r.id)
+    );
+    results = results.map((r) => ({
+      ...r,
+      initialFavorited: favoritedSet.has(r.id),
+      currentUserId: currentUser?.id ?? null,
+    }));
   }
 
   return (

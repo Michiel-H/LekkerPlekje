@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { sanitizeLike } from "@/lib/utils";
 import type { UserRole } from "@/lib/supabase/types";
 
 interface User {
@@ -56,7 +57,8 @@ export default function CommunityTable({
         .range(pageIdx * PAGE_SIZE, pageIdx * PAGE_SIZE + PAGE_SIZE - 1);
 
       if (roleFilter !== "all") query = query.eq("role", roleFilter);
-      if (search.trim()) query = query.ilike("display_name", `%${search.trim()}%`);
+      const term = sanitizeLike(search.trim());
+      if (term) query = query.ilike("display_name", `%${term}%`);
 
       const { data } = await query;
       const rows = (data as User[] | null) ?? [];

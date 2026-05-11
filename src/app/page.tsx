@@ -4,12 +4,12 @@ import MadLibsSearch from "@/components/MadLibsSearch";
 import PlekjeCard from "@/components/PlekjeCard";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
+import { getFavoritedSet } from "@/lib/favorites";
 
 export default async function Home() {
-  const supabase = await createClient();
   const currentUser = await getCurrentUser();
+  const supabase = await createClient();
 
-  // If user has a preferred city, scope homepage to that city
   let preferredCityName: string | null = null;
   let query = supabase
     .from("locations")
@@ -37,15 +37,23 @@ export default async function Home() {
 
   if (currentUser?.preferred_city_id) {
     query = query.eq("city_id", currentUser.preferred_city_id);
-    const { data: city } = await supabase
-      .from("cities")
-      .select("name")
-      .eq("id", currentUser.preferred_city_id)
-      .single();
-    preferredCityName = (city as any)?.name ?? null;
   }
 
-  const { data: locations } = await query;
+  // Run locations and (optional) city name fetch in parallel
+  const [{ data: locations }, cityRes] = await Promise.all([
+    query,
+    currentUser?.preferred_city_id
+      ? supabase
+          .from("cities")
+          .select("name")
+          .eq("id", currentUser.preferred_city_id)
+          .single()
+      : Promise.resolve({ data: null as any }),
+  ]);
+  preferredCityName = (cityRes.data as any)?.name ?? null;
+
+  const locationIds = (locations || []).map((l: any) => l.id);
+  const favoritedSet = await getFavoritedSet(currentUser?.id ?? null, locationIds);
 
   const titleMap: Record<string, string> = {
     vent: "Lekker ventje",
@@ -69,6 +77,8 @@ export default async function Home() {
             loc.users?.role === "toppertje" || loc.users?.role === "admin" || loc.users?.role === "superadmin"
               ? titleMap[loc.users?.pronoun || "neutraal"]
               : undefined,
+          initialFavorited: favoritedSet.has(loc.id),
+          currentUserId: currentUser?.id ?? null,
         }))
       : [];
 

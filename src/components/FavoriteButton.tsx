@@ -6,34 +6,65 @@ import { createClient } from "@/lib/supabase/client";
 interface Props {
   locationId: string;
   size?: "sm" | "md";
+  /**
+   * If the parent already knows the favorite state (server-fetched in batch),
+   * pass it here to skip the per-button auth/favorites round trip.
+   */
+  initialFavorited?: boolean;
+  /**
+   * If known, pass to skip the auth.getUser() call. `null` = not logged in.
+   * `undefined` = unknown, button will fetch.
+   */
+  currentUserId?: string | null;
 }
 
-export default function FavoriteButton({ locationId, size = "md" }: Props) {
-  const [favorited, setFavorited] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const [authed, setAuthed] = useState(false);
+export default function FavoriteButton({
+  locationId,
+  size = "md",
+  initialFavorited,
+  currentUserId,
+}: Props) {
+  const knownAuth = currentUserId !== undefined;
+  const [favorited, setFavorited] = useState(initialFavorited ?? false);
+  const [loaded, setLoaded] = useState(initialFavorited !== undefined);
+  const [authed, setAuthed] = useState<boolean>(knownAuth ? !!currentUserId : false);
+  const [userId, setUserId] = useState<string | null>(knownAuth ? currentUserId ?? null : null);
 
   useEffect(() => {
+    // Skip the round trip when parent already provided state
+    if (knownAuth && initialFavorited !== undefined) return;
+
     const supabase = createClient();
     let cancelled = false;
 
     async function check() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (cancelled) return;
-      if (!user) {
-        setAuthed(false);
+      let uid = userId;
+      if (!knownAuth) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (cancelled) return;
+        if (!user) {
+          setAuthed(false);
+          setLoaded(true);
+          return;
+        }
+        uid = user.id;
+        setAuthed(true);
+        setUserId(uid);
+      }
+      if (!uid) {
         setLoaded(true);
         return;
       }
-      setAuthed(true);
-      const { data } = await supabase
-        .from("favorites")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("location_id", locationId)
-        .maybeSingle();
-      if (cancelled) return;
-      setFavorited(!!data);
+      if (initialFavorited === undefined) {
+        const { data } = await supabase
+          .from("favorites")
+          .select("id")
+          .eq("user_id", uid)
+          .eq("location_id", locationId)
+          .maybeSingle();
+        if (cancelled) return;
+        setFavorited(!!data);
+      }
       setLoaded(true);
     }
 
@@ -41,32 +72,39 @@ export default function FavoriteButton({ locationId, size = "md" }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [locationId]);
+  }, [locationId, knownAuth, currentUserId, initialFavorited]);
 
   async function toggle(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    if (!authed) {
+    if (!authed || !userId) {
       window.location.href = "/login";
       return;
     }
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
 
-    if (favorited) {
-      setFavorited(false);
-      await supabase
-        .from("favorites")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("location_id", locationId);
-    } else {
-      setFavorited(true);
-      await supabase.from("favorites").insert({
-        user_id: user.id,
-        location_id: locationId,
-      } as never);
+    const next = !favorited;
+    setFavorited(next); // optimistic
+
+    const supabase = createClient();
+    try {
+      if (next) {
+        const { error } = await supabase.from("favorites").insert({
+          user_id: userId,
+          location_id: locationId,
+        } as never);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("favorites")
+          .delete()
+          .eq("user_id", userId)
+          .eq("location_id", locationId);
+        if (error) throw error;
+      }
+    } catch (err) {
+      // Roll back optimistic update
+      setFavorited(!next);
+      console.error("Favorite toggle failed:", err);
     }
   }
 

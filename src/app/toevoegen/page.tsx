@@ -8,6 +8,7 @@ import Button from "@/components/Button";
 import { TAGS } from "@/lib/tags";
 import { createClient } from "@/lib/supabase/client";
 import type { TagCategory } from "@/lib/supabase/types";
+import { validateImage, safeImageExt, sanitizeLike } from "@/lib/utils";
 
 export default function ToevoegenPage() {
   const [name, setName] = useState("");
@@ -41,15 +42,12 @@ export default function ToevoegenPage() {
 
     const delayDebounceFn = setTimeout(async () => {
       try {
+        // Note: browsers ignore custom User-Agent, so we don't set one here.
+        // If Nominatim usage grows, proxy this through a Next.js route handler.
         const res = await fetch(
           `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
             address
-          )}&format=json&addressdetails=1&countrycodes=nl&limit=5`,
-          {
-            headers: {
-              "User-Agent": "LekkerPlekjeApp/1.0",
-            },
-          }
+          )}&format=json&addressdetails=1&countrycodes=nl&limit=5`
         );
         const data = await res.json();
         if (active) setAddressSuggestions(data);
@@ -113,11 +111,18 @@ export default function ToevoegenPage() {
       return;
     }
 
-    // Duplicate check — case-insensitive match on address
+    const photoError = validateImage(photo);
+    if (photoError) {
+      setError(photoError);
+      setLoading(false);
+      return;
+    }
+
+    // Duplicate check — case-insensitive match on address (escape LIKE wildcards)
     const { data: existing } = await supabase
       .from("locations")
       .select("id, name, status")
-      .ilike("address", address.trim())
+      .ilike("address", sanitizeLike(address.trim()))
       .limit(1);
 
     const existingRow = (existing as any[] | null)?.[0];
@@ -135,12 +140,12 @@ export default function ToevoegenPage() {
       return;
     }
 
-    // Upload photo
-    const fileExt = photo.name.split(".").pop();
-    const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+    // Upload photo — extension from MIME, not user filename
+    const fileExt = safeImageExt(photo);
+    const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
     const { error: uploadError } = await supabase.storage
       .from("locations")
-      .upload(fileName, photo);
+      .upload(fileName, photo, { contentType: photo.type });
 
     if (uploadError) {
       setError("Er ging iets mis met het uploaden van de foto.");

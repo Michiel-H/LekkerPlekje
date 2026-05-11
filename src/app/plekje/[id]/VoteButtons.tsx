@@ -89,33 +89,46 @@ export default function VoteButtons({
 
     if (!user) return;
 
-    if (vote === type) {
-      // Remove vote
-      setVote(null);
-      if (type === "up") setLekkerCount((c) => c - 1);
-      else setNietLekkerCount((c) => c - 1);
+    // Snapshot for rollback on error
+    const prevVote = vote;
+    const prevLekker = lekkerCount;
+    const prevNietLekker = nietLekkerCount;
 
-      await supabase
-        .from("votes")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("location_tag_id", locationTagId);
-    } else {
-      // Switch or new vote
-      if (vote === "up") setLekkerCount((c) => c - 1);
-      if (vote === "down") setNietLekkerCount((c) => c - 1);
-      setVote(type);
-      if (type === "up") setLekkerCount((c) => c + 1);
-      else setNietLekkerCount((c) => c + 1);
+    try {
+      if (vote === type) {
+        setVote(null);
+        if (type === "up") setLekkerCount((c) => c - 1);
+        else setNietLekkerCount((c) => c - 1);
 
-      await supabase.from("votes").upsert(
-        {
-          user_id: user.id,
-          location_tag_id: locationTagId,
-          vote_type: type,
-        } as never,
-        { onConflict: "user_id,location_tag_id" }
-      );
+        const { error } = await supabase
+          .from("votes")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("location_tag_id", locationTagId);
+        if (error) throw error;
+      } else {
+        if (vote === "up") setLekkerCount((c) => c - 1);
+        if (vote === "down") setNietLekkerCount((c) => c - 1);
+        setVote(type);
+        if (type === "up") setLekkerCount((c) => c + 1);
+        else setNietLekkerCount((c) => c + 1);
+
+        const { error } = await supabase.from("votes").upsert(
+          {
+            user_id: user.id,
+            location_tag_id: locationTagId,
+            vote_type: type,
+          } as never,
+          { onConflict: "user_id,location_tag_id" }
+        );
+        if (error) throw error;
+      }
+    } catch (err) {
+      // Roll back optimistic UI on failure
+      setVote(prevVote);
+      setLekkerCount(prevLekker);
+      setNietLekkerCount(prevNietLekker);
+      console.error("Vote failed:", err);
     }
   }
 

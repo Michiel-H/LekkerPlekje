@@ -32,26 +32,39 @@ export default async function ProfielPage() {
 
   const supabase = await createClient();
 
-  // Fetch preferred city name
-  let preferredCityName: string | null = null;
-  if (user.preferred_city_id) {
-    const { data: city } = await supabase
-      .from("cities")
-      .select("name")
-      .eq("id", user.preferred_city_id)
-      .single();
-    preferredCityName = (city as any)?.name ?? null;
-  }
-
-  // Fetch all my locations (any status) for tabs
-  const { data: myLocations } = await supabase
-    .from("locations")
-    .select(`
-      id, name, neighborhood, image_url, status, created_at,
-      location_tags (tags (name, emoji))
-    `)
-    .eq("submitted_by", user.id)
-    .order("created_at", { ascending: false });
+  // Run the four independent queries in parallel
+  const [cityRes, myLocationsRes, favoritesRes] = await Promise.all([
+    user.preferred_city_id
+      ? supabase
+          .from("cities")
+          .select("name")
+          .eq("id", user.preferred_city_id)
+          .single()
+      : Promise.resolve({ data: null as any }),
+    supabase
+      .from("locations")
+      .select(
+        `id, name, neighborhood, image_url, status, created_at,
+         location_tags (tags (name, emoji))`
+      )
+      .eq("submitted_by", user.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("favorites")
+      .select(
+        `location_id,
+         locations (
+           id, name, neighborhood, image_url, status,
+           location_tags (tags (name, emoji)),
+           users!locations_submitted_by_fkey (display_name, pronoun, role)
+         )`
+      )
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false }),
+  ]);
+  const preferredCityName: string | null = (cityRes.data as any)?.name ?? null;
+  const myLocations = myLocationsRes.data;
+  const favorites = favoritesRes.data;
 
   const isToppertjeLike =
     user.role === "toppertje" || user.role === "admin" || user.role === "superadmin";
@@ -72,22 +85,9 @@ export default async function ProfielPage() {
       })),
       toppertjeName: user!.display_name,
       toppertjeTitle: isToppertjeLike ? titleMap[user!.pronoun] : undefined,
+      currentUserId: user!.id,
     };
   }
-
-  // Fetch favorites
-  const { data: favorites } = await supabase
-    .from("favorites")
-    .select(`
-      location_id,
-      locations (
-        id, name, neighborhood, image_url, status,
-        location_tags (tags (name, emoji)),
-        users!locations_submitted_by_fkey (display_name, pronoun, role)
-      )
-    `)
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
 
   const favoritePlekjes = ((favorites || []) as any[])
     .map((f: any) => f.locations)
@@ -108,6 +108,9 @@ export default async function ProfielPage() {
         loc.users?.role === "superadmin"
           ? titleMap[loc.users?.pronoun || "neutraal"]
           : undefined,
+      // All items in "Opgeslagen" are by definition favorited
+      initialFavorited: true,
+      currentUserId: user!.id,
     }));
 
   // Smaak-score: % of "up" votes across the user's location_tags

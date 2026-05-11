@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { validateImage, safeImageExt, MAX_AVATAR_SIZE } from "@/lib/utils";
 
 interface Props {
   userId: string;
@@ -19,14 +20,23 @@ export default function AvatarUpload({ userId, initialUrl, fallbackInitial }: Pr
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const validationError = validateImage(file, MAX_AVATAR_SIZE);
+    if (validationError) {
+      alert(validationError);
+      e.target.value = "";
+      return;
+    }
+
     setUploading(true);
     try {
       const supabase = createClient();
-      const ext = file.name.split(".").pop();
+      // Extension derived from MIME, not from the user-supplied filename
+      const ext = safeImageExt(file);
       const path = `${userId}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
-        .upload(path, file, { upsert: true });
+        .upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
       const publicUrl = data.publicUrl;
@@ -41,6 +51,7 @@ export default function AvatarUpload({ userId, initialUrl, fallbackInitial }: Pr
       alert("Foto uploaden mislukt. Probeer een andere afbeelding.");
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   }
 

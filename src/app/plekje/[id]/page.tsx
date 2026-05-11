@@ -34,6 +34,7 @@ export default async function PlekjeDetailPage({ params }: Props) {
         neighborhood,
         image_url,
         submitted_by,
+        cities (name),
         location_tags (
           id,
           score,
@@ -58,6 +59,7 @@ export default async function PlekjeDetailPage({ params }: Props) {
         id: loc.id,
         name: loc.name,
         neighborhood: loc.neighborhood,
+        cityName: loc.cities?.name ?? null,
         imageUrl: loc.image_url,
         tags: (loc.location_tags || []).map((lt: any) => ({
           locationTagId: lt.id,
@@ -131,9 +133,9 @@ export default async function PlekjeDetailPage({ params }: Props) {
               <h1 className="font-display text-3xl sm:text-4xl font-bold text-espresso">
                 {plekje.name}
               </h1>
-              {plekje.neighborhood && (
+              {(plekje.neighborhood || plekje.cityName) && (
                 <p className="mt-1 text-lg text-espresso-light">
-                  {plekje.neighborhood}, Amsterdam
+                  {[plekje.neighborhood, plekje.cityName].filter(Boolean).join(", ")}
                 </p>
               )}
             </div>

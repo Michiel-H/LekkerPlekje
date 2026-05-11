@@ -3,9 +3,11 @@ import Footer from "@/components/Footer";
 import PlekjeCard from "@/components/PlekjeCard";
 import MadLibsSearch from "@/components/MadLibsSearch";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
+import { getFavoritedSet } from "@/lib/favorites";
 
 export default async function AmsterdamPage() {
-  const supabase = await createClient();
+  const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
 
   const titleMap: Record<string, string> = {
     vent: "Lekker ventje",
@@ -35,6 +37,9 @@ export default async function AmsterdamPage() {
     .eq("status", "published")
     .order("created_at", { ascending: false });
 
+  const locationIds = (locations || []).map((l: any) => l.id);
+  const favoritedSet = await getFavoritedSet(currentUser?.id ?? null, locationIds);
+
   const plekjes = (locations || []).map((loc: any) => ({
     id: loc.id,
     name: loc.name,
@@ -49,6 +54,8 @@ export default async function AmsterdamPage() {
       loc.users?.role === "toppertje" || loc.users?.role === "admin" || loc.users?.role === "superadmin"
         ? titleMap[loc.users?.pronoun || "neutraal"]
         : undefined,
+    initialFavorited: favoritedSet.has(loc.id),
+    currentUserId: currentUser?.id ?? null,
   }));
 
   return (
