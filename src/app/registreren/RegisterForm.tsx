@@ -27,6 +27,7 @@ export default function RegisterForm() {
   const [cities, setCities] = useState<City[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -79,10 +80,15 @@ export default function RegisterForm() {
         return;
       }
 
+      // Build the redirect URL from the current origin so the confirm
+      // email link always points back at the deployment the user signed up on.
+      const redirectTo = `${window.location.origin}/auth/callback`;
+
       const { data: signUpData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: redirectTo,
           data: {
             display_name: displayName.trim(),
             pronoun,
@@ -101,7 +107,8 @@ export default function RegisterForm() {
         return;
       }
 
-      // Save preferred city after signup if chosen
+      // Save preferred city after signup if chosen. The auth.users row exists
+      // already (the trigger created public.users via SECURITY DEFINER).
       if (preferredCityId && signUpData.user) {
         await supabase
           .from("users")
@@ -109,13 +116,73 @@ export default function RegisterForm() {
           .eq("id", signUpData.user.id);
       }
 
-      router.push("/profiel");
-      router.refresh();
+      // Show the "check your email" confirmation screen — the user can't
+      // log in until they've confirmed.
+      setSubmittedEmail(email);
     } catch (err: any) {
       setError(err.message || "Er is iets misgegaan tijdens het registreren.");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (submittedEmail) {
+    return (
+      <main className="flex-1 px-4 py-12 sm:py-16">
+        <div className="mx-auto max-w-md text-center">
+          <div className="mx-auto w-16 h-16 rounded-full bg-spritz/10 flex items-center justify-center mb-6">
+            <svg
+              className="w-8 h-8 text-spritz"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.8"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+              />
+            </svg>
+          </div>
+          <h1 className="font-display text-2xl font-bold text-espresso">
+            Check je inbox
+          </h1>
+          <p className="mt-3 text-espresso-light">
+            We hebben een bevestigingsmail gestuurd naar{" "}
+            <strong className="text-espresso">{submittedEmail}</strong>.
+          </p>
+          <p className="mt-2 text-sm text-espresso-light">
+            Klik op de link in de mail om je account te activeren. Daarna kun je
+            inloggen en direct plekjes tippen.
+          </p>
+
+          <div className="mt-6 rounded-xl bg-spritz/5 border border-spritz/15 p-4 text-left">
+            <p className="text-sm font-medium text-espresso">Niets ontvangen?</p>
+            <ul className="mt-1 text-xs text-espresso-light list-disc pl-5 space-y-1">
+              <li>Check je spam- of reclame-map.</li>
+              <li>Controleer of het e-mailadres klopt.</li>
+              <li>
+                Probleem houdt aan? Mail{" "}
+                <a
+                  href="mailto:contact@lekkerplekje.nl"
+                  className="text-spritz hover:underline"
+                >
+                  contact@lekkerplekje.nl
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <Link
+            href="/login"
+            className="mt-8 inline-flex items-center rounded-full bg-espresso px-6 py-2.5 text-sm font-medium text-creme hover:bg-espresso-light transition-colors"
+          >
+            Naar inloggen
+          </Link>
+        </div>
+      </main>
+    );
   }
 
   return (

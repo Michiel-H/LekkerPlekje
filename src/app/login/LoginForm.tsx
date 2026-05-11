@@ -10,12 +10,17 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [needsConfirm, setNeedsConfirm] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendMsg, setResendMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setNeedsConfirm(false);
+    setResendMsg(null);
     setLoading(true);
 
     try {
@@ -26,7 +31,23 @@ export default function LoginForm() {
       });
 
       if (error) {
-        setError(error.message);
+        // Supabase returns this when the user signed up but hasn't clicked the
+        // confirmation link yet. Surface a clear UI for it.
+        const msg = error.message?.toLowerCase() ?? "";
+        if (
+          (error as any).code === "email_not_confirmed" ||
+          msg.includes("email not confirmed") ||
+          msg.includes("not confirmed")
+        ) {
+          setNeedsConfirm(true);
+        } else if (
+          msg.includes("invalid login") ||
+          msg.includes("invalid credentials")
+        ) {
+          setError("E-mailadres of wachtwoord klopt niet.");
+        } else {
+          setError(error.message);
+        }
         setLoading(false);
         return;
       }
@@ -37,6 +58,24 @@ export default function LoginForm() {
       setError(err.message || "Er is iets misgegaan.");
       setLoading(false);
     }
+  }
+
+  async function resendConfirmation() {
+    if (!email) return;
+    setResending(true);
+    setResendMsg(null);
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    });
+    setResending(false);
+    setResendMsg(
+      error
+        ? "Verzenden mislukt. Probeer het later opnieuw."
+        : "Nieuwe bevestigingsmail verstuurd."
+    );
   }
 
   return (
@@ -54,6 +93,30 @@ export default function LoginForm() {
           {error && (
             <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               {error}
+            </div>
+          )}
+
+          {needsConfirm && (
+            <div className="mb-4 rounded-xl bg-spritz/5 border border-spritz/20 px-4 py-3 text-sm">
+              <p className="font-medium text-espresso">
+                Je e-mail is nog niet bevestigd.
+              </p>
+              <p className="mt-1 text-espresso-light">
+                We hebben een bevestigingsmail gestuurd naar{" "}
+                <strong className="text-espresso">{email}</strong>. Klik op de
+                link in die mail om je account te activeren.
+              </p>
+              <button
+                type="button"
+                onClick={resendConfirmation}
+                disabled={resending}
+                className="mt-2 text-xs font-medium text-spritz hover:text-spritz-hover disabled:opacity-50"
+              >
+                {resending ? "Versturen..." : "Stuur nieuwe bevestigingsmail"}
+              </button>
+              {resendMsg && (
+                <p className="mt-1 text-xs text-espresso-light">{resendMsg}</p>
+              )}
             </div>
           )}
 
