@@ -6,10 +6,22 @@ import { GEZELSCHAP_TAGS, VIBE_TAGS } from "@/lib/tags";
 
 const STAD_OPTIONS = [
   { slug: "amsterdam", name: "Amsterdam", live: true },
-  { slug: "utrecht", name: "Utrecht", live: false },
-  { slug: "rotterdam", name: "Rotterdam", live: false },
-  { slug: "den-haag", name: "Den Haag", live: false },
-  { slug: "eindhoven", name: "Eindhoven", live: false },
+  { slug: "utrecht", name: "Utrecht", live: true },
+  { slug: "groningen", name: "Groningen", live: true },
+  { slug: "leiden", name: "Leiden", live: true },
+  { slug: "rotterdam", name: "Rotterdam", live: true },
+  { slug: "delft", name: "Delft", live: true },
+  { slug: "enschede", name: "Enschede", live: true },
+  { slug: "wageningen", name: "Wageningen", live: true },
+  { slug: "eindhoven", name: "Eindhoven", live: true },
+  { slug: "tilburg", name: "Tilburg", live: true },
+  { slug: "nijmegen", name: "Nijmegen", live: true },
+  { slug: "maastricht", name: "Maastricht", live: true },
+  { slug: "den-haag", name: "Den Haag", live: true },
+  { slug: "zwolle", name: "Zwolle", live: true },
+  { slug: "breda", name: "Breda", live: true },
+  { slug: "leeuwarden", name: "Leeuwarden", live: true },
+  { slug: "haarlem", name: "Haarlem", live: true },
 ];
 
 type Slot = "vibe" | "gezelschap" | "stad" | null;

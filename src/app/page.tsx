@@ -186,24 +186,46 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Steden */}
+        {/* Steden — direct doorklikken */}
         <section className="px-4 py-12 sm:py-16 bg-white/50">
           <div className="mx-auto max-w-4xl text-center">
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-espresso mb-8">
-              Binnenkort ook in
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-espresso mb-2">
+              In welke stad zoek je?
             </h2>
+            <p className="text-espresso-light mb-8">
+              Klik je stad aan en zie alle lekkere plekjes.
+            </p>
             <div className="flex flex-wrap justify-center gap-3">
-              {["Utrecht", "Rotterdam", "Den Haag", "Eindhoven"].map(
-                (city) => (
-                  <span
+              {[
+                "Amsterdam",
+                "Utrecht",
+                "Groningen",
+                "Leiden",
+                "Rotterdam",
+                "Delft",
+                "Enschede",
+                "Wageningen",
+                "Eindhoven",
+                "Tilburg",
+                "Nijmegen",
+                "Maastricht",
+                "Den Haag",
+                "Zwolle",
+                "Breda",
+                "Leeuwarden",
+                "Haarlem",
+              ].map((city) => {
+                const slug = city.toLowerCase().replace(/ /g, "-");
+                return (
+                  <a
                     key={city}
-                    className="inline-flex items-center rounded-full bg-espresso/5 px-5 py-2.5 text-sm font-medium text-espresso-light cursor-pointer hover:bg-spritz/10 hover:text-spritz transition-colors"
+                    href={`/resultaten?stad=${slug}`}
+                    className="inline-flex items-center rounded-full bg-espresso/5 px-5 py-2.5 text-sm font-medium text-espresso-light hover:bg-spritz/10 hover:text-spritz transition-colors"
                   >
                     {city}
-                    <span className="ml-2 text-xs opacity-50">coming soon</span>
-                  </span>
-                )
-              )}
+                  </a>
+                );
+              })}
             </div>
           </div>
         </section>
