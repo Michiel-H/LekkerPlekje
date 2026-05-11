@@ -27,13 +27,27 @@ export default function BioEditor({ userId, initialBio }: Props) {
     router.refresh();
   }
 
+  const MAX_WORDS = 25;
+  const wordCount = bio.trim() === "" ? 0 : bio.trim().split(/\s+/).length;
+
+  function handleChange(value: string) {
+    // Enforce word limit — truncate to first MAX_WORDS words, but allow a
+    // trailing space so the user can keep typing the next word
+    const words = value.split(/\s+/);
+    if (words.length > MAX_WORDS) {
+      setBio(words.slice(0, MAX_WORDS).join(" "));
+    } else {
+      setBio(value);
+    }
+  }
+
   if (!editing) {
     return (
       <button
         onClick={() => setEditing(true)}
         className="text-sm text-espresso-light italic hover:text-espresso transition-colors text-left"
       >
-        {bio ? `"${bio}"` : "+ Voeg een vibe toe over jezelf"}
+        {bio ? `"${bio}"` : "+ Voeg iets toe over jezelf"}
       </button>
     );
   }
@@ -42,13 +56,15 @@ export default function BioEditor({ userId, initialBio }: Props) {
     <div className="flex flex-col gap-2 w-full max-w-md">
       <textarea
         value={bio}
-        onChange={(e) => setBio(e.target.value.slice(0, 140))}
+        onChange={(e) => handleChange(e.target.value)}
         rows={2}
         placeholder="bijv. Altijd op zoek naar terrassen waar je tot 21:00 zon hebt."
         className="w-full rounded-lg border border-espresso/15 bg-white px-3 py-2 text-sm text-espresso placeholder:text-espresso-light/60 focus:outline-none focus:ring-2 focus:ring-spritz/50 resize-none"
       />
       <div className="flex items-center justify-between">
-        <span className="text-xs text-espresso-light/60">{bio.length}/140</span>
+        <span className={`text-xs ${wordCount >= MAX_WORDS ? "text-koraal" : "text-espresso-light/60"}`}>
+          {wordCount}/{MAX_WORDS} woorden
+        </span>
         <div className="flex gap-2">
           <button
             onClick={() => {
