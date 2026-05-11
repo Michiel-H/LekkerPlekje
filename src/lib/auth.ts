@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/lib/supabase/types";
 
@@ -13,7 +14,11 @@ interface UserProfile {
   bio?: string | null;
 }
 
-export async function getCurrentUser(): Promise<UserProfile | null> {
+/**
+ * Wrapped in React `cache()` so multiple calls within the same server request
+ * (e.g. Header + page + layout) share one DB round trip.
+ */
+export const getCurrentUser = cache(async (): Promise<UserProfile | null> => {
   const supabase = await createClient();
   const {
     data: { user: authUser },
@@ -39,7 +44,7 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
     approved_count: 0,
     created_at: authUser.created_at,
   } as UserProfile;
-}
+});
 
 export function isAdmin(role: UserRole) {
   return role === "admin" || role === "superadmin";

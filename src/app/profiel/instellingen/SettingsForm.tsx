@@ -71,18 +71,23 @@ export default function SettingsForm({
   async function deleteAccount() {
     setDeleting(true);
     setDeleteErr(null);
-    const supabase = createClient();
-    // Delete the public.users row — auth user remains but has no profile
-    // (full deletion of auth.users requires service role; admin can finish)
-    const { error } = await supabase.from("users").delete().eq("id", userId);
-    if (error) {
-      setDeleteErr(error.message);
+    try {
+      const res = await fetch("/api/account/delete", { method: "POST" });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setDeleteErr(body.error ?? "Verwijderen mislukt.");
+        setDeleting(false);
+        return;
+      }
+      // Server already signed us out — clear client session cache too
+      const supabase = createClient();
+      await supabase.auth.signOut().catch(() => {});
+      router.push("/");
+      router.refresh();
+    } catch (err: any) {
+      setDeleteErr(err?.message ?? "Verwijderen mislukt.");
       setDeleting(false);
-      return;
     }
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
   }
 
   return (
