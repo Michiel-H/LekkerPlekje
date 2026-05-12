@@ -72,7 +72,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:contact@lekkerplekje.nl"
+                  href="mailto:contact@lekkerplekje.com"
                   className="text-sm text-espresso-light hover:text-spritz transition-colors"
                 >
                   Contact
@@ -85,7 +85,7 @@ export default function Footer() {
         {/* Bedrijfsgegevens */}
         <div className="mt-8 border-t border-espresso/10 pt-6 text-center text-xs text-espresso-light space-y-1">
           <p>
-            &copy; {new Date().getFullYear()} LekkerPlekje.nl
+            &copy; {new Date().getFullYear()} LekkerPlekje.com
             {" · "}
             KvK <span className="text-espresso-light/60">[in aanvraag]</span>
             {" · "}
@@ -93,10 +93,10 @@ export default function Footer() {
           </p>
           <p>
             <a
-              href="mailto:contact@lekkerplekje.nl"
+              href="mailto:contact@lekkerplekje.com"
               className="hover:text-spritz transition-colors"
             >
-              contact@lekkerplekje.nl
+              contact@lekkerplekje.com
             </a>
           </p>
           <p className="text-espresso-light/70">

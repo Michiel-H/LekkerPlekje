@@ -16,7 +16,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   if (!UUID_RE.test(id)) {
-    return { title: "Plekje niet gevonden · LekkerPlekje.nl" };
+    return { title: "Plekje niet gevonden · LekkerPlekje.com" };
   }
 
   const supabase = await createClient();
@@ -34,13 +34,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }
     | null;
   if (!loc) {
-    return { title: "Plekje niet gevonden · LekkerPlekje.nl" };
+    return { title: "Plekje niet gevonden · LekkerPlekje.com" };
   }
 
   const location = [loc.neighborhood, loc.cities?.name].filter(Boolean).join(", ");
   const title = location
-    ? `${loc.name} — ${location} · LekkerPlekje.nl`
-    : `${loc.name} · LekkerPlekje.nl`;
+    ? `${loc.name} — ${location} · LekkerPlekje.com`
+    : `${loc.name} · LekkerPlekje.com`;
   const description = `Ontdek ${loc.name}${
     location ? ` in ${location}` : ""
   } op LekkerPlekje — getipt door locals.`;

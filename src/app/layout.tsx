@@ -18,7 +18,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lekkerplekje.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "LekkerPlekje.nl — Vind het lekkerste plekje voor elk moment",
+  title: "LekkerPlekje.com — Vind het lekkerste plekje voor elk moment",
   description:
     "Geen sterren, geen lange recensies. Gewoon goeie tips voor het juiste plekje op het juiste moment.",
   icons: {
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   openGraph: {
-    title: "LekkerPlekje.nl — Vind het lekkerste plekje voor elk moment",
+    title: "LekkerPlekje.com — Vind het lekkerste plekje voor elk moment",
     description:
       "Geen sterren, geen lange recensies. Gewoon goeie tips voor het juiste plekje.",
     images: [{ url: "/og-image.png", width: 1998, height: 787, alt: "LekkerPlekje" }],
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "LekkerPlekje.nl",
+    title: "LekkerPlekje.com",
     description: "Geen sterren. Gewoon goeie tips.",
     images: ["/og-image.png"],
   },

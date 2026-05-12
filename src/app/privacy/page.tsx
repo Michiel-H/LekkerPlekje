@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "Privacyverklaring · LekkerPlekje.nl",
+  title: "Privacyverklaring · LekkerPlekje.com",
 };
 
 export default function PrivacyPage() {
@@ -19,12 +19,12 @@ export default function PrivacyPage() {
           </p>
 
           <p className="mt-6">
-            Bij LekkerPlekje.nl willen we het je makkelijk maken om het lekkerste plekje
+            Bij LekkerPlekje.com willen we het je makkelijk maken om het lekkerste plekje
             voor jouw moment te vinden. Daarvoor verwerken we sommige gegevens van je.
             We willen heel duidelijk uitleggen welke, waarom, en hoe lang. Ben je iets
             niet duidelijk? Mail ons op{" "}
-            <a href="mailto:contact@lekkerplekje.nl" className="text-spritz hover:underline">
-              contact@lekkerplekje.nl
+            <a href="mailto:contact@lekkerplekje.com" className="text-spritz hover:underline">
+              contact@lekkerplekje.com
             </a>
             .
           </p>
@@ -32,13 +32,13 @@ export default function PrivacyPage() {
           <h2 className="font-display text-xl font-semibold text-espresso mt-10">
             Wie is verantwoordelijk?
           </h2>
-          <p className="mt-3">LekkerPlekje.nl wordt geëxploiteerd door:</p>
+          <p className="mt-3">LekkerPlekje.com wordt geëxploiteerd door:</p>
           <ul className="mt-2 list-disc pl-5 space-y-1">
             <li>[Bedrijfsnaam + rechtsvorm — in aanvraag]</li>
             <li>KvK-nummer: [in aanvraag]</li>
             <li>BTW-nummer: [in aanvraag]</li>
             <li>Adres: [in aanvraag]</li>
-            <li>E-mail: contact@lekkerplekje.nl</li>
+            <li>E-mail: contact@lekkerplekje.com</li>
           </ul>
           <p className="mt-3">
             Wij zijn de &quot;verwerkingsverantwoordelijke&quot; in de zin van de AVG.
@@ -155,8 +155,8 @@ export default function PrivacyPage() {
           </ul>
           <p className="mt-3">
             Mail{" "}
-            <a href="mailto:contact@lekkerplekje.nl" className="text-spritz hover:underline">
-              contact@lekkerplekje.nl
+            <a href="mailto:contact@lekkerplekje.com" className="text-spritz hover:underline">
+              contact@lekkerplekje.com
             </a>{" "}
             om een van deze rechten uit te oefenen. We reageren binnen 30 dagen.
           </p>
@@ -181,8 +181,8 @@ export default function PrivacyPage() {
             HTTPS overal, wachtwoorden gehasht opgeslagen, databases versleuteld,
             regelmatige updates. Geen enkel systeem is 100% veilig — meld je een lek?
             Mail het naar{" "}
-            <a href="mailto:contact@lekkerplekje.nl" className="text-spritz hover:underline">
-              contact@lekkerplekje.nl
+            <a href="mailto:contact@lekkerplekje.com" className="text-spritz hover:underline">
+              contact@lekkerplekje.com
             </a>
             .
           </p>

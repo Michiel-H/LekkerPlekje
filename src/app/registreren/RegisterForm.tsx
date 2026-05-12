@@ -165,10 +165,10 @@ export default function RegisterForm() {
               <li>
                 Probleem houdt aan? Mail{" "}
                 <a
-                  href="mailto:contact@lekkerplekje.nl"
+                  href="mailto:contact@lekkerplekje.com"
                   className="text-spritz hover:underline"
                 >
-                  contact@lekkerplekje.nl
+                  contact@lekkerplekje.com
                 </a>
               </li>
             </ul>

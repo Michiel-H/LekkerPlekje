@@ -8,10 +8,10 @@ import { getCurrentUser } from "@/lib/auth";
 import { getFavoritedSet } from "@/lib/favorites";
 
 export const metadata: Metadata = {
-  title: "Amsterdam · LekkerPlekje.nl",
+  title: "Amsterdam · LekkerPlekje.com",
   description: "De lekkerste plekjes van Amsterdam, getipt door locals.",
   openGraph: {
-    title: "De lekkerste plekjes van Amsterdam · LekkerPlekje.nl",
+    title: "De lekkerste plekjes van Amsterdam · LekkerPlekje.com",
     description: "Cafés, restaurants, terrasjes en koffieplekken in Amsterdam.",
     locale: "nl_NL",
     type: "website",

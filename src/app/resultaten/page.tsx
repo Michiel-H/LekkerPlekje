@@ -24,7 +24,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     tagNames.length ? `Plekjes voor ${tagNames.join(" en ")}` : "Alle plekjes",
     cityName ? `in ${cityName}` : null,
   ].filter(Boolean);
-  const title = `${parts.join(" ")} · LekkerPlekje.nl`;
+  const title = `${parts.join(" ")} · LekkerPlekje.com`;
   return {
     title,
     description: `${parts.join(" ")} — getipt door locals.`,

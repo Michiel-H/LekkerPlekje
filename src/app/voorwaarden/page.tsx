@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "Algemene voorwaarden · LekkerPlekje.nl",
+  title: "Algemene voorwaarden · LekkerPlekje.com",
 };
 
 export default function VoorwaardenPage() {
@@ -19,7 +19,7 @@ export default function VoorwaardenPage() {
           </p>
 
           <p className="mt-6">
-            Welkom bij LekkerPlekje.nl. Door onze site te gebruiken ga je akkoord met
+            Welkom bij LekkerPlekje.com. Door onze site te gebruiken ga je akkoord met
             deze voorwaarden. We hebben ze zo kort en helder mogelijk gehouden — geen
             kleine lettertjes om je te verrassen.
           </p>
@@ -28,7 +28,7 @@ export default function VoorwaardenPage() {
             1. Wie zijn wij?
           </h2>
           <p className="mt-3">
-            LekkerPlekje.nl is een dienst van [Bedrijfsnaam + rechtsvorm — in
+            LekkerPlekje.com is een dienst van [Bedrijfsnaam + rechtsvorm — in
             aanvraag], gevestigd te [adres — in aanvraag], KvK [in aanvraag]. We bieden
             een platform waarop gebruikers tips uitwisselen over fijne plekjes om te
             eten, drinken en zijn. We zijn zelf geen horeca-aanbieder en hebben geen
@@ -154,8 +154,8 @@ export default function VoorwaardenPage() {
           </h2>
           <p className="mt-3">
             Heb je een melding over een plekje, gebruiker of stem? Mail{" "}
-            <a href="mailto:contact@lekkerplekje.nl" className="text-spritz hover:underline">
-              contact@lekkerplekje.nl
+            <a href="mailto:contact@lekkerplekje.com" className="text-spritz hover:underline">
+              contact@lekkerplekje.com
             </a>{" "}
             of gebruik de meld-knop op de detailpagina. We reageren binnen 48 uur.
             Meer info op de{" "}
@@ -213,8 +213,8 @@ export default function VoorwaardenPage() {
           </h2>
           <p className="mt-3">
             Vragen, klachten, of gewoon een lekkere tip?{" "}
-            <a href="mailto:contact@lekkerplekje.nl" className="text-spritz hover:underline">
-              contact@lekkerplekje.nl
+            <a href="mailto:contact@lekkerplekje.com" className="text-spritz hover:underline">
+              contact@lekkerplekje.com
             </a>
           </p>
         </article>

@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "Meldingen & klachten · LekkerPlekje.nl",
+  title: "Meldingen & klachten · LekkerPlekje.com",
 };
 
 export default function MeldingenPage() {
@@ -37,8 +37,8 @@ export default function MeldingenPage() {
           <p className="mt-3">
             Voor algemene meldingen, klachten over gebruikers, of als je geen account
             wilt aanmaken — mail{" "}
-            <a href="mailto:contact@lekkerplekje.nl" className="text-spritz hover:underline">
-              contact@lekkerplekje.nl
+            <a href="mailto:contact@lekkerplekje.com" className="text-spritz hover:underline">
+              contact@lekkerplekje.com
             </a>
             .
           </p>
@@ -49,8 +49,8 @@ export default function MeldingenPage() {
           <p className="mt-3">
             Staat jouw zaak op LekkerPlekje en wil je iets aanpassen of de vermelding
             laten verwijderen? Dat kan altijd. Mail{" "}
-            <a href="mailto:contact@lekkerplekje.nl" className="text-spritz hover:underline">
-              contact@lekkerplekje.nl
+            <a href="mailto:contact@lekkerplekje.com" className="text-spritz hover:underline">
+              contact@lekkerplekje.com
             </a>{" "}
             vanaf een e-mailadres dat aan de zaak gekoppeld is, met:
           </p>
@@ -74,8 +74,8 @@ export default function MeldingenPage() {
           </h2>
           <p className="mt-3">
             Vermoed je dat een foto of tekst inbreuk maakt op jouw rechten? Mail{" "}
-            <a href="mailto:contact@lekkerplekje.nl" className="text-spritz hover:underline">
-              contact@lekkerplekje.nl
+            <a href="mailto:contact@lekkerplekje.com" className="text-spritz hover:underline">
+              contact@lekkerplekje.com
             </a>{" "}
             met:
           </p>
