@@ -33,6 +33,7 @@ export default function LocatiesTable() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   // Filters
   const [search, setSearch] = useState("");
@@ -108,33 +109,52 @@ export default function LocatiesTable() {
 
   async function saveEdit(id: string) {
     setActionLoading(id);
-    const supabase = createClient();
-    await supabase
-      .from("locations")
-      .update({
-        name: editName,
-        address: editAddress,
-        neighborhood: editNeighborhood || null,
-      } as never)
-      .eq("id", id);
-    setLocations((prev) =>
-      prev.map((l) =>
-        l.id === id
-          ? { ...l, name: editName, address: editAddress, neighborhood: editNeighborhood || null }
-          : l
-      )
-    );
-    setEditing(null);
-    setActionLoading(null);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/admin/locations/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editName,
+          address: editAddress,
+          neighborhood: editNeighborhood || null,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Opslaan mislukt.");
+      }
+      setLocations((prev) =>
+        prev.map((l) =>
+          l.id === id
+            ? { ...l, name: editName, address: editAddress, neighborhood: editNeighborhood || null }
+            : l
+        )
+      );
+      setEditing(null);
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : "Opslaan mislukt.");
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) return;
     setActionLoading(id);
-    const supabase = createClient();
-    await supabase.from("locations").delete().eq("id", id);
-    setLocations((prev) => prev.filter((l) => l.id !== id));
-    setActionLoading(null);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/admin/locations/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Verwijderen mislukt.");
+      }
+      setLocations((prev) => prev.filter((l) => l.id !== id));
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : "Verwijderen mislukt.");
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   return (
@@ -157,7 +177,7 @@ export default function LocatiesTable() {
         />
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as any)}
+          onChange={(e) => setStatusFilter(e.target.value as "all" | Location["status"])}
           className="sm:w-44 rounded-lg border border-espresso/15 bg-white px-3 py-2 text-sm text-espresso focus:outline-none focus:ring-2 focus:ring-spritz/50"
         >
           <option value="all">Alle statussen</option>
@@ -166,6 +186,12 @@ export default function LocatiesTable() {
           <option value="rejected">Afgewezen</option>
         </select>
       </div>
+
+      {actionError && (
+        <div className="rounded-xl bg-koraal/5 border border-koraal/20 px-4 py-3 text-sm text-koraal">
+          {actionError}
+        </div>
+      )}
 
       {/* Table */}
       <div className="rounded-xl bg-white border border-espresso/8 overflow-hidden">

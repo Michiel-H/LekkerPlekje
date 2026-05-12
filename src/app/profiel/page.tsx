@@ -73,6 +73,11 @@ export default async function ProfielPage() {
   const myPending = (myLocations || []).filter((l: any) => l.status === "pending");
   const myRejected = (myLocations || []).filter((l: any) => l.status === "rejected");
 
+  // Compute approved count from actual published locations instead of trusting
+  // the denormalised counter on the user row — it can drift when a previously
+  // approved location is later rejected or deleted.
+  const liveApprovedCount = myPublished.length;
+
   function mapPlekje(loc: any) {
     return {
       id: loc.id,
@@ -159,7 +164,7 @@ export default async function ProfielPage() {
                   </span>
                 ) : (
                   <span className="text-sm text-espresso-light">
-                    {user.approved_count} / 5 plekjes tot Toppertje
+                    {liveApprovedCount} / 5 plekjes tot Toppertje
                   </span>
                 )}
                 <CityPicker
@@ -196,19 +201,19 @@ export default async function ProfielPage() {
             <div className="mb-8 rounded-xl bg-spritz/5 border border-spritz/15 p-4">
               <div className="flex justify-between text-sm mb-2">
                 <span className="font-medium text-espresso">
-                  {user.approved_count >= 5
+                  {liveApprovedCount >= 5
                     ? "Bijna! Wacht op de volgende goedkeuring 🎉"
-                    : `Nog ${5 - user.approved_count} goedgekeurde ${
-                        5 - user.approved_count === 1 ? "plekje" : "plekjes"
+                    : `Nog ${5 - liveApprovedCount} goedgekeurde ${
+                        5 - liveApprovedCount === 1 ? "plekje" : "plekjes"
                       } te gaan en je bent een ${titleMap[user.pronoun]}!`}
                 </span>
-                <span className="text-espresso-light">{user.approved_count}/5</span>
+                <span className="text-espresso-light">{liveApprovedCount}/5</span>
               </div>
               <div className="h-2 rounded-full bg-espresso/5">
                 <div
                   className="h-2 rounded-full bg-spritz transition-all"
                   style={{
-                    width: `${Math.min((user.approved_count / 5) * 100, 100)}%`,
+                    width: `${Math.min((liveApprovedCount / 5) * 100, 100)}%`,
                   }}
                 />
               </div>

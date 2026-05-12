@@ -14,7 +14,10 @@ const manrope = Manrope({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lekkerplekje.com";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "LekkerPlekje.nl — Vind het lekkerste plekje voor elk moment",
   description:
     "Geen sterren, geen lange recensies. Gewoon goeie tips voor het juiste plekje op het juiste moment.",

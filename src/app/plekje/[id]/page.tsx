@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
+import Image from "next/image";
 import VoteButtons from "./VoteButtons";
 import FavoriteButton from "@/components/FavoriteButton";
 import { createClient } from "@/lib/supabase/server";
@@ -9,15 +11,66 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  if (!UUID_RE.test(id)) {
+    return { title: "Plekje niet gevonden · LekkerPlekje.nl" };
+  }
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("locations")
+    .select("name, neighborhood, image_url, cities (name)")
+    .eq("id", id)
+    .single();
+  const loc = data as
+    | {
+        name: string;
+        neighborhood: string | null;
+        image_url: string | null;
+        cities: { name: string } | null;
+      }
+    | null;
+  if (!loc) {
+    return { title: "Plekje niet gevonden · LekkerPlekje.nl" };
+  }
+
+  const location = [loc.neighborhood, loc.cities?.name].filter(Boolean).join(", ");
+  const title = location
+    ? `${loc.name} — ${location} · LekkerPlekje.nl`
+    : `${loc.name} · LekkerPlekje.nl`;
+  const description = `Ontdek ${loc.name}${
+    location ? ` in ${location}` : ""
+  } op LekkerPlekje — getipt door locals.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      locale: "nl_NL",
+      images: loc.image_url ? [{ url: loc.image_url, alt: loc.name }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: loc.image_url ? [loc.image_url] : undefined,
+    },
+  };
+}
+
 export default async function PlekjeDetailPage({ params }: Props) {
   const { id } = await params;
 
   let plekje: any = null;
 
   // Try fetching from Supabase if the id looks like a UUID
-  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-
-  if (isUUID) {
+  if (UUID_RE.test(id)) {
     const supabase = await createClient();
 
     const titleMap: Record<string, string> = {
@@ -113,12 +166,15 @@ export default async function PlekjeDetailPage({ params }: Props) {
           </Link>
 
           {/* Image */}
-          <div className="mt-6 aspect-[16/9] rounded-2xl bg-groen/10 overflow-hidden">
+          <div className="mt-6 aspect-[16/9] rounded-2xl bg-groen/10 overflow-hidden relative">
             {plekje.imageUrl ? (
-              <img
+              <Image
                 src={plekje.imageUrl}
                 alt={plekje.name}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(min-width: 768px) 768px, 100vw"
+                priority
+                className="object-cover"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-lg font-display font-semibold text-groen/40">

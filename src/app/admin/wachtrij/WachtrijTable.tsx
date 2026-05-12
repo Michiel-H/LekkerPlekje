@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 interface Location {
@@ -16,25 +15,35 @@ interface Location {
 export default function WachtrijTable({ locations }: { locations: Location[] }) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  async function handleAction(id: string, action: "publish" | "reject") {
+  async function handleAction(id: string, action: "approve" | "reject") {
     setLoading(id);
-    const supabase = createClient();
-
-    await supabase
-      .from("locations")
-      .update({
-        status: action === "publish" ? "published" : "rejected",
-        approved_at: action === "publish" ? new Date().toISOString() : null,
-      } as never)
-      .eq("id", id);
-
-    router.refresh();
-    setLoading(null);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/locations/${id}/${action}`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Actie mislukt.");
+      }
+      router.refresh();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Actie mislukt.";
+      setError(message);
+    } finally {
+      setLoading(null);
+    }
   }
 
   return (
     <div className="rounded-xl bg-white border border-espresso/8 overflow-hidden">
+      {error && (
+        <div className="px-4 py-3 text-sm text-koraal bg-koraal/5 border-b border-koraal/15">
+          {error}
+        </div>
+      )}
       <table className="w-full">
         <thead>
           <tr className="border-b border-espresso/8 bg-espresso/[0.02]">
@@ -57,7 +66,7 @@ export default function WachtrijTable({ locations }: { locations: Location[] }) 
               <td className="px-4 py-3 text-right">
                 <div className="flex items-center justify-end gap-2">
                   <button
-                    onClick={() => handleAction(loc.id, "publish")}
+                    onClick={() => handleAction(loc.id, "approve")}
                     disabled={loading === loc.id}
                     className="rounded-lg bg-groen/10 px-3 py-1.5 text-xs font-medium text-groen hover:bg-groen/20 transition-colors disabled:opacity-50"
                   >

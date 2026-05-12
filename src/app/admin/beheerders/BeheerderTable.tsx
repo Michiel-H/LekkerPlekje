@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { UserRole } from "@/lib/supabase/types";
 
@@ -30,18 +29,38 @@ const ROLE_COLORS: Record<UserRole, string> = {
 export default function BeheerderTable({ users }: { users: User[] }) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function changeRole(userId: string, newRole: UserRole) {
     setLoading(userId);
-    const supabase = createClient();
-    await supabase.from("users").update({ role: newRole } as never).eq("id", userId);
-    router.refresh();
-    setLoading(null);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/role`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Rolwijziging mislukt.");
+      }
+      router.refresh();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Rolwijziging mislukt.");
+    } finally {
+      setLoading(null);
+    }
   }
 
   return (
-    <div className="rounded-xl bg-white border border-espresso/8 overflow-hidden">
-      <table className="w-full">
+    <div className="space-y-3">
+      {error && (
+        <div className="rounded-xl bg-koraal/5 border border-koraal/20 px-4 py-3 text-sm text-koraal">
+          {error}
+        </div>
+      )}
+      <div className="rounded-xl bg-white border border-espresso/8 overflow-hidden">
+        <table className="w-full">
         <thead>
           <tr className="border-b border-espresso/8 bg-espresso/[0.02]">
             <th className="text-left px-4 py-3 text-xs font-semibold text-espresso-light uppercase tracking-wider">Naam</th>
@@ -93,6 +112,7 @@ export default function BeheerderTable({ users }: { users: User[] }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
