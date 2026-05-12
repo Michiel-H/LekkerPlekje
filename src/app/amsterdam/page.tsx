@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PlekjeCard from "@/components/PlekjeCard";
@@ -5,6 +6,17 @@ import MadLibsSearch from "@/components/MadLibsSearch";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getFavoritedSet } from "@/lib/favorites";
+
+export const metadata: Metadata = {
+  title: "Amsterdam · LekkerPlekje.nl",
+  description: "De lekkerste plekjes van Amsterdam, getipt door locals.",
+  openGraph: {
+    title: "De lekkerste plekjes van Amsterdam · LekkerPlekje.nl",
+    description: "Cafés, restaurants, terrasjes en koffieplekken in Amsterdam.",
+    locale: "nl_NL",
+    type: "website",
+  },
+};
 
 export default async function AmsterdamPage() {
   const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
@@ -15,27 +27,37 @@ export default async function AmsterdamPage() {
     neutraal: "Toppertje",
   };
 
-  const { data: locations } = await supabase
-    .from("locations")
-    .select(`
-      id,
-      name,
-      neighborhood,
-      image_url,
-      location_tags (
-        tags (
+  const { data: cityRow } = await supabase
+    .from("cities")
+    .select("id")
+    .eq("slug", "amsterdam")
+    .single();
+  const cityId = (cityRow as { id: string } | null)?.id;
+
+  const { data: locations } = cityId
+    ? await supabase
+        .from("locations")
+        .select(`
+          id,
           name,
-          emoji
-        )
-      ),
-      users!locations_submitted_by_fkey (
-        display_name,
-        pronoun,
-        role
-      )
-    `)
-    .eq("status", "published")
-    .order("created_at", { ascending: false });
+          neighborhood,
+          image_url,
+          location_tags (
+            tags (
+              name,
+              emoji
+            )
+          ),
+          users!locations_submitted_by_fkey (
+            display_name,
+            pronoun,
+            role
+          )
+        `)
+        .eq("status", "published")
+        .eq("city_id", cityId)
+        .order("created_at", { ascending: false })
+    : { data: [] as unknown[] };
 
   const locationIds = (locations || []).map((l: any) => l.id);
   const favoritedSet = await getFavoritedSet(currentUser?.id ?? null, locationIds);

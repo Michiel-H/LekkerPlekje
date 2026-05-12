@@ -90,14 +90,29 @@ export default function CommunityTable({
     return () => obs.disconnect();
   }, [page, hasMore, loadingMore, fetchPage]);
 
+  const [roleError, setRoleError] = useState<string | null>(null);
+
   async function changeRole(userId: string, newRole: UserRole) {
     setActionLoading(userId);
-    const supabase = createClient();
-    await supabase.from("users").update({ role: newRole } as never).eq("id", userId);
-    setUsers((prev) =>
-      prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
-    );
-    setActionLoading(null);
+    setRoleError(null);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/role`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Rolwijziging mislukt.");
+      }
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+      );
+    } catch (err: unknown) {
+      setRoleError(err instanceof Error ? err.message : "Rolwijziging mislukt.");
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   return (
@@ -123,6 +138,12 @@ export default function CommunityTable({
           <option value="superadmin">Superadmin</option>
         </select>
       </div>
+
+      {roleError && (
+        <div className="rounded-xl bg-koraal/5 border border-koraal/20 px-4 py-3 text-sm text-koraal">
+          {roleError}
+        </div>
+      )}
 
       <div className="rounded-xl bg-white border border-espresso/8 overflow-hidden">
         <table className="w-full">

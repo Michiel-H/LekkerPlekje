@@ -176,6 +176,46 @@ export interface Database {
           search_context: string | null;
         }>;
       };
+      favorites: {
+        Row: {
+          id: string;
+          user_id: string;
+          location_id: string;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          location_id: string;
+        };
+        Update: Partial<{
+          user_id: string;
+          location_id: string;
+        }>;
+      };
+      admin_audit_log: {
+        Row: {
+          id: string;
+          admin_id: string;
+          action: string;
+          target_type: string;
+          target_id: string | null;
+          metadata: Record<string, unknown> | null;
+          created_at: string;
+        };
+        Insert: {
+          admin_id: string;
+          action: string;
+          target_type: string;
+          target_id?: string | null;
+          metadata?: Record<string, unknown> | null;
+        };
+        Update: Partial<{
+          action: string;
+          target_type: string;
+          target_id: string | null;
+          metadata: Record<string, unknown> | null;
+        }>;
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

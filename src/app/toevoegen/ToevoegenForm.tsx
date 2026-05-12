@@ -6,7 +6,7 @@ import Button from "@/components/Button";
 import { TAGS } from "@/lib/tags";
 import { createClient } from "@/lib/supabase/client";
 import type { TagCategory } from "@/lib/supabase/types";
-import { validateImage, safeImageExt, sanitizeLike } from "@/lib/utils";
+import { validateImage, safeImageExt, sanitizeLike, stripImageMetadata } from "@/lib/utils";
 
 export default function ToevoegenForm() {
   const [name, setName] = useState("");
@@ -116,6 +116,9 @@ export default function ToevoegenForm() {
       return;
     }
 
+    // Strip EXIF (incl. GPS) before upload — see lib/utils stripImageMetadata.
+    const sanitizedPhoto = await stripImageMetadata(photo);
+
     // Duplicate check — case-insensitive match on address (escape LIKE wildcards)
     const { data: existing } = await supabase
       .from("locations")
@@ -139,11 +142,11 @@ export default function ToevoegenForm() {
     }
 
     // Upload photo — extension from MIME, not user filename
-    const fileExt = safeImageExt(photo);
+    const fileExt = safeImageExt(sanitizedPhoto);
     const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
     const { error: uploadError } = await supabase.storage
       .from("locations")
-      .upload(fileName, photo, { contentType: photo.type });
+      .upload(fileName, sanitizedPhoto, { contentType: sanitizedPhoto.type });
 
     if (uploadError) {
       setError("Er ging iets mis met het uploaden van de foto.");

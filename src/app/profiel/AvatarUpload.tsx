@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { validateImage, safeImageExt, MAX_AVATAR_SIZE } from "@/lib/utils";
+import { validateImage, safeImageExt, MAX_AVATAR_SIZE, stripImageMetadata } from "@/lib/utils";
 
 interface Props {
   userId: string;
@@ -31,12 +31,14 @@ export default function AvatarUpload({ userId, initialUrl, fallbackInitial }: Pr
     setUploading(true);
     try {
       const supabase = createClient();
+      // Strip EXIF (incl. GPS) before upload.
+      const sanitized = await stripImageMetadata(file);
       // Extension derived from MIME, not from the user-supplied filename
-      const ext = safeImageExt(file);
+      const ext = safeImageExt(sanitized);
       const path = `${userId}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
-        .upload(path, file, { upsert: true, contentType: file.type });
+        .upload(path, sanitized, { upsert: true, contentType: sanitized.type });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
       const publicUrl = data.publicUrl;

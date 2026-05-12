@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PlekjeCard from "@/components/PlekjeCard";
@@ -9,6 +10,25 @@ import { getFavoritedSet } from "@/lib/favorites";
 
 interface Props {
   searchParams: Promise<{ gezelschap?: string; vibe?: string; stad?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { gezelschap, vibe, stad } = await searchParams;
+  const tagNames = [gezelschap, vibe]
+    .map((slug) => (slug ? TAGS.find((t) => t.slug === slug)?.name : null))
+    .filter(Boolean);
+  const cityName = stad
+    ? stad.charAt(0).toUpperCase() + stad.slice(1).replace(/-/g, " ")
+    : null;
+  const parts = [
+    tagNames.length ? `Plekjes voor ${tagNames.join(" en ")}` : "Alle plekjes",
+    cityName ? `in ${cityName}` : null,
+  ].filter(Boolean);
+  const title = `${parts.join(" ")} · LekkerPlekje.nl`;
+  return {
+    title,
+    description: `${parts.join(" ")} — getipt door locals.`,
+  };
 }
 
 export default async function ResultatenPage({ searchParams }: Props) {
@@ -27,6 +47,17 @@ export default async function ResultatenPage({ searchParams }: Props) {
     griet: "Lekker grietje",
     neutraal: "Toppertje",
   };
+
+  // Look up the city by slug if one was selected, so we can filter results.
+  let cityId: string | null = null;
+  if (stad) {
+    const { data: cityRow } = await supabase
+      .from("cities")
+      .select("id")
+      .eq("slug", stad)
+      .single();
+    cityId = (cityRow as { id: string } | null)?.id ?? null;
+  }
 
   let results: any[] = [];
 
@@ -51,7 +82,7 @@ export default async function ResultatenPage({ searchParams }: Props) {
       if (ltRows && ltRows.length > 0) {
         const locationIds = [...new Set(ltRows.map((lt: any) => lt.location_id))];
 
-        const { data: locations } = await supabase
+        let locationsQuery = supabase
           .from("locations")
           .select(`
             id,
@@ -73,6 +104,8 @@ export default async function ResultatenPage({ searchParams }: Props) {
           `)
           .eq("status", "published")
           .in("id", locationIds);
+        if (cityId) locationsQuery = locationsQuery.eq("city_id", cityId);
+        const { data: locations } = await locationsQuery;
 
         if (locations && locations.length > 0) {
           results = (locations as any[]).map((loc: any) => ({
@@ -94,8 +127,8 @@ export default async function ResultatenPage({ searchParams }: Props) {
       }
     }
   } else {
-    // No filters — show all published locations
-    const { data: locations } = await supabase
+    // No tag filters — show all published locations (still filter by city if set)
+    let locationsQuery = supabase
       .from("locations")
       .select(`
         id,
@@ -117,6 +150,8 @@ export default async function ResultatenPage({ searchParams }: Props) {
       `)
       .eq("status", "published")
       .limit(20);
+    if (cityId) locationsQuery = locationsQuery.eq("city_id", cityId);
+    const { data: locations } = await locationsQuery;
 
     if (locations && locations.length > 0) {
       results = locations.map((loc: any) => ({
