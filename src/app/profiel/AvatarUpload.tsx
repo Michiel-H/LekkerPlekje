@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { validateImage, safeImageExt, MAX_AVATAR_SIZE, stripImageMetadata } from "@/lib/utils";
+import { reportError } from "@/lib/reportError";
 
 interface Props {
   userId: string;
@@ -49,7 +50,7 @@ export default function AvatarUpload({ userId, initialUrl, fallbackInitial }: Pr
       setUrl(publicUrl);
       router.refresh();
     } catch (err) {
-      console.error(err);
+      reportError(err, { where: "AvatarUpload", userId });
       alert("Foto uploaden mislukt. Probeer een andere afbeelding.");
     } finally {
       setUploading(false);

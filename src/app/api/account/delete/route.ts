@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { reportError } from "@/lib/reportError";
 
 /**
  * Fully delete the current user's account.
@@ -28,7 +29,7 @@ export async function POST() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   if (!serviceKey || !supabaseUrl) {
-    console.error("Missing SUPABASE_SERVICE_ROLE_KEY or NEXT_PUBLIC_SUPABASE_URL");
+    reportError(new Error("account/delete: missing service-role env vars"));
     return NextResponse.json(
       { error: "Server is niet geconfigureerd voor account-verwijdering." },
       { status: 500 }
@@ -47,7 +48,7 @@ export async function POST() {
   // 2. Delete the auth user — this frees the email for future re-registration
   const { error: authError } = await admin.auth.admin.deleteUser(user.id);
   if (authError) {
-    console.error("auth.admin.deleteUser failed:", authError);
+    reportError(authError, { where: "account/delete", userId: user.id });
     return NextResponse.json(
       { error: "Account-verwijdering is mislukt. Probeer het later opnieuw." },
       { status: 500 }

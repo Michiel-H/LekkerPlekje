@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { reportError } from "@/lib/reportError";
 
 interface VoteButtonsProps {
   locationTagId: string;
@@ -128,7 +129,7 @@ export default function VoteButtons({
       setVote(prevVote);
       setLekkerCount(prevLekker);
       setNietLekkerCount(prevNietLekker);
-      console.error("Vote failed:", err);
+      reportError(err, { where: "VoteButtons", locationTagId });
     }
   }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { reportError } from "@/lib/reportError";
 
 interface Props {
   locationId: string;
@@ -104,7 +105,7 @@ export default function FavoriteButton({
     } catch (err) {
       // Roll back optimistic update
       setFavorited(!next);
-      console.error("Favorite toggle failed:", err);
+      reportError(err, { where: "FavoriteButton", locationId });
     }
   }
 

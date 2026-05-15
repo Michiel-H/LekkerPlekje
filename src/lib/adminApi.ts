@@ -3,6 +3,7 @@ import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient, SupabaseClient } from "@supabase/supabase-js";
 import { getCurrentUser, isAdmin, isSuperAdmin } from "@/lib/auth";
 import type { Database } from "@/lib/supabase/types";
+import { reportError } from "@/lib/reportError";
 
 interface AuthorizedContext {
   adminId: string;
@@ -83,7 +84,7 @@ export async function recordAuditEvent(payload: AuditPayload) {
       metadata: payload.metadata ?? null,
     } as never);
   } catch (err) {
-    console.error("Failed to write audit log:", err);
+    reportError(err, { where: "recordAuditEvent", payload });
   }
 }
 
