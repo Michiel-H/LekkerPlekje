@@ -8,15 +8,10 @@ import CityPicker from "./CityPicker";
 import AvatarUpload from "./AvatarUpload";
 import BioEditor from "./BioEditor";
 import ProfielTabs from "./ProfielTabs";
+import { isToppertjeLike, toppertjeTitle, toppertjeTitleForRole } from "@/lib/titleMap";
 
 export default async function ProfielPage() {
   const user = await getCurrentUser();
-
-  const titleMap: Record<string, string> = {
-    vent: "Lekker ventje",
-    griet: "Lekker grietje",
-    neutraal: "Toppertje",
-  };
 
   if (!user) {
     return (
@@ -66,8 +61,7 @@ export default async function ProfielPage() {
   const myLocations = myLocationsRes.data;
   const favorites = favoritesRes.data;
 
-  const isToppertjeLike =
-    user.role === "toppertje" || user.role === "admin" || user.role === "superadmin";
+  const userIsToppertje = isToppertjeLike(user.role);
 
   const myPublished = (myLocations || []).filter((l: any) => l.status === "published");
   const myPending = (myLocations || []).filter((l: any) => l.status === "pending");
@@ -89,7 +83,7 @@ export default async function ProfielPage() {
         name: lt.tags?.name || "",
       })),
       toppertjeName: user!.display_name,
-      toppertjeTitle: isToppertjeLike ? titleMap[user!.pronoun] : undefined,
+      toppertjeTitle: userIsToppertje ? toppertjeTitle(user!.pronoun) : undefined,
       currentUserId: user!.id,
     };
   }
@@ -107,12 +101,7 @@ export default async function ProfielPage() {
         name: lt.tags?.name || "",
       })),
       toppertjeName: loc.users?.display_name,
-      toppertjeTitle:
-        loc.users?.role === "toppertje" ||
-        loc.users?.role === "admin" ||
-        loc.users?.role === "superadmin"
-          ? titleMap[loc.users?.pronoun || "neutraal"]
-          : undefined,
+      toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
       // All items in "Opgeslagen" are by definition favorited
       initialFavorited: true,
       currentUserId: user!.id,
@@ -156,11 +145,11 @@ export default async function ProfielPage() {
                 {user.display_name}
               </h1>
               <div className="flex flex-wrap items-center gap-2 mt-2">
-                {isToppertjeLike ? (
+                {userIsToppertje ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-spritz/10 px-3 py-1 text-sm font-medium text-spritz">
                     {user.role === "admin" || user.role === "superadmin"
                       ? "Beheerder"
-                      : titleMap[user.pronoun]}
+                      : toppertjeTitle(user.pronoun)}
                   </span>
                 ) : (
                   <span className="text-sm text-espresso-light">
@@ -205,7 +194,7 @@ export default async function ProfielPage() {
                     ? "Bijna! Wacht op de volgende goedkeuring 🎉"
                     : `Nog ${5 - liveApprovedCount} goedgekeurde ${
                         5 - liveApprovedCount === 1 ? "plekje" : "plekjes"
-                      } te gaan en je bent een ${titleMap[user.pronoun]}!`}
+                      } te gaan en je bent een ${toppertjeTitle(user.pronoun)}!`}
                 </span>
                 <span className="text-espresso-light">{liveApprovedCount}/5</span>
               </div>

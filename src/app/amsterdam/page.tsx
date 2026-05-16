@@ -6,6 +6,7 @@ import MadLibsSearch from "@/components/MadLibsSearch";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getFavoritedSet } from "@/lib/favorites";
+import { toppertjeTitleForRole } from "@/lib/titleMap";
 
 export const metadata: Metadata = {
   title: "Amsterdam · LekkerPlekje.com",
@@ -20,12 +21,6 @@ export const metadata: Metadata = {
 
 export default async function AmsterdamPage() {
   const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
-
-  const titleMap: Record<string, string> = {
-    vent: "Lekker ventje",
-    griet: "Lekker grietje",
-    neutraal: "Toppertje",
-  };
 
   const { data: cityRow } = await supabase
     .from("cities")
@@ -72,10 +67,7 @@ export default async function AmsterdamPage() {
       name: lt.tags?.name || "",
     })),
     toppertjeName: loc.users?.display_name,
-    toppertjeTitle:
-      loc.users?.role === "toppertje" || loc.users?.role === "admin" || loc.users?.role === "superadmin"
-        ? titleMap[loc.users?.pronoun || "neutraal"]
-        : undefined,
+    toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
     initialFavorited: favoritedSet.has(loc.id),
     currentUserId: currentUser?.id ?? null,
   }));

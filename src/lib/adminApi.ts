@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient, SupabaseClient } from "@supabase/supabase-js";
 import { getCurrentUser, isAdmin, isSuperAdmin } from "@/lib/auth";
 import type { Database } from "@/lib/supabase/types";
@@ -72,11 +71,17 @@ interface AuditPayload {
 /**
  * Write a row to admin_audit_log. Best-effort: a logging failure must
  * NOT prevent the actual moderation action from completing.
+ *
+ * Uses the service-role client (from requireAdmin) rather than the cookie
+ * session, so a logging miss can't be caused by an expired token — and
+ * the write goes through even if the admin's RLS context is somehow off.
  */
-export async function recordAuditEvent(payload: AuditPayload) {
+export async function recordAuditEvent(
+  client: SupabaseClient<Database>,
+  payload: AuditPayload
+) {
   try {
-    const supabase = await createServerClient();
-    await supabase.from("admin_audit_log").insert({
+    await client.from("admin_audit_log").insert({
       admin_id: payload.adminId,
       action: payload.action,
       target_type: payload.targetType,

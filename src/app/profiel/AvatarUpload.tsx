@@ -3,7 +3,13 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { validateImage, safeImageExt, MAX_AVATAR_SIZE, stripImageMetadata } from "@/lib/utils";
+import {
+  ALLOWED_IMAGE_ACCEPT,
+  validateImage,
+  safeImageExt,
+  MAX_AVATAR_SIZE,
+  stripImageMetadata,
+} from "@/lib/utils";
 import { reportError } from "@/lib/reportError";
 
 interface Props {
@@ -79,7 +85,7 @@ export default function AvatarUpload({ userId, initialUrl, fallbackInitial }: Pr
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept={ALLOWED_IMAGE_ACCEPT}
         className="hidden"
         onChange={handleFile}
       />

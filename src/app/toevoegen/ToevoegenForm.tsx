@@ -6,7 +6,17 @@ import Button from "@/components/Button";
 import { TAGS } from "@/lib/tags";
 import { createClient } from "@/lib/supabase/client";
 import type { TagCategory } from "@/lib/supabase/types";
-import { validateImage, safeImageExt, sanitizeLike, stripImageMetadata } from "@/lib/utils";
+import {
+  ALLOWED_IMAGE_ACCEPT,
+  validateImage,
+  safeImageExt,
+  sanitizeLike,
+  stripImageMetadata,
+} from "@/lib/utils";
+
+const NAME_MAX = 120;
+const ADDRESS_MAX = 200;
+const NEIGHBORHOOD_MAX = 100;
 
 export default function ToevoegenForm() {
   const [name, setName] = useState("");
@@ -40,17 +50,14 @@ export default function ToevoegenForm() {
 
     const delayDebounceFn = setTimeout(async () => {
       try {
-        // Note: browsers ignore custom User-Agent, so we don't set one here.
-        // If Nominatim usage grows, proxy this through a Next.js route handler.
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-            address
-          )}&format=json&addressdetails=1&countrycodes=nl&limit=5`
-        );
+        // Route through our /api/geocode proxy so Nominatim sees a proper
+        // User-Agent (their TOS requires one; browsers can't set it).
+        const res = await fetch(`/api/geocode?q=${encodeURIComponent(address)}`);
+        if (!res.ok) return;
         const data = await res.json();
-        if (active) setAddressSuggestions(data);
+        if (active && Array.isArray(data)) setAddressSuggestions(data);
       } catch (err) {
-        console.error("Nominatim search error:", err);
+        console.error("Geocode search error:", err);
       }
     }, 400);
 
@@ -76,6 +83,28 @@ export default function ToevoegenForm() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
+    // Client-side length validation — mirrors the DB CHECK constraints in
+    // supabase/migrations/20260515120000_audit_fixes.sql. The DB is the
+    // ultimate authority; this just gives the user a friendly error first.
+    const trimmedName = name.trim();
+    const trimmedAddress = address.trim();
+    const trimmedNeighborhood = neighborhood.trim();
+    if (!trimmedName || trimmedName.length > NAME_MAX) {
+      setError(`Naam mag maximaal ${NAME_MAX} tekens zijn.`);
+      setLoading(false);
+      return;
+    }
+    if (!trimmedAddress || trimmedAddress.length > ADDRESS_MAX) {
+      setError(`Adres mag maximaal ${ADDRESS_MAX} tekens zijn.`);
+      setLoading(false);
+      return;
+    }
+    if (!trimmedNeighborhood || trimmedNeighborhood.length > NEIGHBORHOOD_MAX) {
+      setError(`Buurt mag maximaal ${NEIGHBORHOOD_MAX} tekens zijn.`);
+      setLoading(false);
+      return;
+    }
 
     const supabase = createClient();
 
@@ -119,11 +148,13 @@ export default function ToevoegenForm() {
     // Strip EXIF (incl. GPS) before upload — see lib/utils stripImageMetadata.
     const sanitizedPhoto = await stripImageMetadata(photo);
 
-    // Duplicate check — case-insensitive match on address (escape LIKE wildcards)
+    // Duplicate check — case-insensitive match on address (escape LIKE wildcards).
+    // The DB's unique index handles the authoritative check (incl. whitespace
+    // normalisation); this is a quick friendly path for the common case.
     const { data: existing } = await supabase
       .from("locations")
       .select("id, name, status")
-      .ilike("address", sanitizeLike(address.trim()))
+      .ilike("address", sanitizeLike(trimmedAddress))
       .limit(1);
 
     const existingRow = (existing as any[] | null)?.[0];
@@ -163,9 +194,9 @@ export default function ToevoegenForm() {
     const { data: locationData, error: locationError } = await supabase
       .from("locations")
       .insert({
-        name,
-        address,
-        neighborhood,
+        name: trimmedName,
+        address: trimmedAddress,
+        neighborhood: trimmedNeighborhood,
         city_id: cityRow.id,
         image_url: imageUrl,
         submitted_by: user.id,
@@ -266,6 +297,7 @@ export default function ToevoegenForm() {
               <input
                 type="text"
                 required
+                maxLength={NAME_MAX}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="bijv. Café de Klos"
@@ -281,6 +313,7 @@ export default function ToevoegenForm() {
               <input
                 type="text"
                 required
+                maxLength={ADDRESS_MAX}
                 value={address}
                 onChange={(e) => {
                   setAddress(e.target.value);
@@ -344,6 +377,7 @@ export default function ToevoegenForm() {
               <input
                 type="text"
                 required
+                maxLength={NEIGHBORHOOD_MAX}
                 value={neighborhood}
                 onChange={(e) => setNeighborhood(e.target.value)}
                 placeholder="bijv. Jordaan, De Pijp, Oost"
@@ -358,7 +392,7 @@ export default function ToevoegenForm() {
               </label>
               <input
                 type="file"
-                accept="image/*"
+                accept={ALLOWED_IMAGE_ACCEPT}
                 required
                 onChange={(e) => {
                   if (e.target.files && e.target.files.length > 0) {
@@ -368,7 +402,7 @@ export default function ToevoegenForm() {
                 className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-spritz/10 file:text-spritz hover:file:bg-spritz/20 focus:outline-none focus:ring-2 focus:ring-spritz/50"
               />
               <p className="mt-1 text-xs text-espresso-light">
-                Zorg voor een sfeervolle of duidelijke foto van het plekje (verplicht).
+                Zorg voor een sfeervolle of duidelijke foto van het plekje (verplicht). JPG, PNG of WebP, max 10 MB.
               </p>
             </div>
 

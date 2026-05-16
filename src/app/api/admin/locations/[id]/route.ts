@@ -60,7 +60,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  await recordAuditEvent({
+  await recordAuditEvent(ctx.admin, {
     adminId: ctx.adminId,
     action: "edit_location",
     targetType: "location",
@@ -82,7 +82,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  await recordAuditEvent({
+  await recordAuditEvent(ctx.admin, {
     adminId: ctx.adminId,
     action: "delete_location",
     targetType: "location",

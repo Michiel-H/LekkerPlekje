@@ -9,14 +9,21 @@ export function sanitizeLike(input: string): string {
 
 /**
  * Allowed image MIME types for user uploads.
+ *
+ * HEIC/HEIF are intentionally excluded: browsers can't decode them into a
+ * canvas, so we can't strip EXIF (incl. GPS) before upload. When the file
+ * input's `accept` attribute lists only non-HEIC types, iOS Safari
+ * transparently converts the user's HEIC photo to JPEG during selection,
+ * which both gets us EXIF-stripping AND universal browser rendering.
  */
 export const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
-  "image/heic",
-  "image/heif",
 ] as const;
+
+/** Same as ALLOWED_IMAGE_TYPES, formatted for an <input accept=...> attribute. */
+export const ALLOWED_IMAGE_ACCEPT = ALLOWED_IMAGE_TYPES.join(",");
 
 export const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5 MB
 export const MAX_PHOTO_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -28,8 +35,8 @@ export function validateImage(
   file: File,
   maxSize: number = MAX_PHOTO_SIZE
 ): string | null {
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type as any)) {
-    return "Alleen JPG, PNG, WebP of HEIC zijn toegestaan.";
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type as (typeof ALLOWED_IMAGE_TYPES)[number])) {
+    return "Alleen JPG, PNG of WebP zijn toegestaan.";
   }
   if (file.size > maxSize) {
     const mb = Math.round(maxSize / (1024 * 1024));
@@ -50,29 +57,20 @@ export function safeImageExt(file: File): string {
     "image/jpeg": "jpg",
     "image/png": "png",
     "image/webp": "webp",
-    "image/heic": "heic",
-    "image/heif": "heif",
   };
   return map[file.type] ?? "jpg";
 }
 
 /**
  * Strip EXIF metadata (including GPS coordinates) from an uploaded image by
- * rendering it to a canvas and re-exporting. Also normalises HEIC/HEIF to
- * JPEG so all browsers can render the result, and caps dimensions at 2048px
- * on the long edge to keep file sizes sane.
+ * rendering it to a canvas and re-exporting. Caps dimensions at 2048px on
+ * the long edge to keep file sizes sane.
  *
- * Falls back to the original file if the browser can't decode it — better to
- * ship the user's photo with metadata than to fail the upload.
+ * Falls back to the original file if the browser can't decode it — better
+ * to ship the user's photo with metadata than to fail the upload.
  */
 export async function stripImageMetadata(file: File): Promise<File> {
   if (typeof window === "undefined") return file;
-
-  const isHeic = file.type === "image/heic" || file.type === "image/heif";
-  // Most browsers can't decode HEIC into a canvas; pass it through unchanged.
-  // (HEIC files generally don't expose GPS to the consumer either way,
-  // and Supabase's image CDN handles them.)
-  if (isHeic) return file;
 
   const outputType =
     file.type === "image/png" ? "image/png"

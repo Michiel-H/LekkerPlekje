@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Button from "@/components/Button";
 import Link from "next/link";
+import { DISPLAY_NAME_MAX, validateDisplayName } from "@/lib/displayName";
 
 interface City {
   id: string;
@@ -40,22 +41,13 @@ export default function RegisterForm() {
     })();
   }, []);
 
-  function validateUsername(name: string): string | null {
-    const trimmed = name.trim();
-    if (trimmed.length < 3) return "Gebruikersnaam moet minimaal 3 tekens zijn.";
-    if (trimmed.length > 24) return "Gebruikersnaam mag maximaal 24 tekens zijn.";
-    if (!/^[a-zA-Z0-9_-]+$/.test(trimmed))
-      return "Alleen letters, cijfers, _ en - zijn toegestaan.";
-    return null;
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      const usernameError = validateUsername(displayName);
+      const usernameError = validateDisplayName(displayName);
       if (usernameError) {
         setError(usernameError);
         setLoading(false);
@@ -211,13 +203,14 @@ export default function RegisterForm() {
               <input
                 type="text"
                 required
+                maxLength={DISPLAY_NAME_MAX}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Kies een unieke naam"
                 className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 focus:ring-spritz/50"
               />
               <p className="mt-1 text-xs text-espresso-light">
-                3–24 tekens
+                3–24 tekens, alleen letters, cijfers, _ en -
               </p>
             </div>
 

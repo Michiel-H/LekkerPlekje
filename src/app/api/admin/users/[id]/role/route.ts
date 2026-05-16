@@ -65,7 +65,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  await recordAuditEvent({
+  await recordAuditEvent(ctx.admin, {
     adminId: ctx.adminId,
     action: "change_user_role",
     targetType: "user",

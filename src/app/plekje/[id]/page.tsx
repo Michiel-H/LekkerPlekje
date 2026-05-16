@@ -6,16 +6,16 @@ import Image from "next/image";
 import VoteButtons from "./VoteButtons";
 import FavoriteButton from "@/components/FavoriteButton";
 import { createClient } from "@/lib/supabase/server";
+import { isUuid } from "@/lib/uuid";
+import { toppertjeTitleForRole } from "@/lib/titleMap";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  if (!UUID_RE.test(id)) {
+  if (!isUuid(id)) {
     return { title: "Plekje niet gevonden · LekkerPlekje.com" };
   }
 
@@ -70,20 +70,15 @@ export default async function PlekjeDetailPage({ params }: Props) {
   let plekje: any = null;
 
   // Try fetching from Supabase if the id looks like a UUID
-  if (UUID_RE.test(id)) {
+  if (isUuid(id)) {
     const supabase = await createClient();
-
-    const titleMap: Record<string, string> = {
-      vent: "Lekker ventje",
-      griet: "Lekker grietje",
-      neutraal: "Toppertje",
-    };
 
     const { data: location } = await supabase
       .from("locations")
       .select(`
         id,
         name,
+        address,
         neighborhood,
         image_url,
         submitted_by,
@@ -111,6 +106,7 @@ export default async function PlekjeDetailPage({ params }: Props) {
       plekje = {
         id: loc.id,
         name: loc.name,
+        address: loc.address,
         neighborhood: loc.neighborhood,
         cityName: loc.cities?.name ?? null,
         imageUrl: loc.image_url,
@@ -122,10 +118,7 @@ export default async function PlekjeDetailPage({ params }: Props) {
           nietLekkerCount: (lt.total_votes || 0) - (lt.score || 0),
         })),
         toppertjeName: loc.users?.display_name,
-        toppertjeTitle:
-          loc.users?.role === "toppertje" || loc.users?.role === "admin" || loc.users?.role === "superadmin"
-            ? titleMap[loc.users?.pronoun || "neutraal"]
-            : undefined,
+        toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
       };
     }
   }
@@ -153,9 +146,31 @@ export default async function PlekjeDetailPage({ params }: Props) {
     );
   }
 
+  // Schema.org JSON-LD for rich-result eligibility. Embedded values come
+  // from admin-approved DB content, but escape `<` defensively in case a
+  // submitter ever sneaks an HTML-looking name past moderation.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: plekje.name,
+    ...(plekje.imageUrl ? { image: plekje.imageUrl } : {}),
+    address: {
+      "@type": "PostalAddress",
+      ...(plekje.address ? { streetAddress: plekje.address } : {}),
+      ...(plekje.neighborhood ? { addressLocality: plekje.neighborhood } : {}),
+      ...(plekje.cityName ? { addressRegion: plekje.cityName } : {}),
+      addressCountry: "NL",
+    },
+  };
+  const jsonLdHtml = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
+
   return (
     <>
       <Header />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml }}
+      />
       <main className="flex-1 px-4 py-8 sm:py-12">
         <div className="mx-auto max-w-3xl">
           <Link

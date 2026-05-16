@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { reportError } from "@/lib/reportError";
+import { isUuid } from "@/lib/uuid";
 
 interface VoteButtonsProps {
   locationTagId: string;
@@ -21,6 +22,11 @@ export default function VoteButtons({
 
   // Load current user's existing vote and subscribe to live changes
   useEffect(() => {
+    // Defense-in-depth: the prop is server-rendered, but reject anything
+    // that doesn't match a UUID before using it as a Realtime filter value
+    // or in a DB query.
+    if (!isUuid(locationTagId)) return;
+
     const supabase = createClient();
     let cancelled = false;
 
@@ -83,6 +89,7 @@ export default function VoteButtons({
   }, [locationTagId]);
 
   async function handleVote(type: "up" | "down") {
+    if (!isUuid(locationTagId)) return;
     const supabase = createClient();
     const {
       data: { user },

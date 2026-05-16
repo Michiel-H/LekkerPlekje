@@ -7,6 +7,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getFavoritedSet } from "@/lib/favorites";
+import { toppertjeTitleForRole } from "@/lib/titleMap";
 
 interface Props {
   searchParams: Promise<{ gezelschap?: string; vibe?: string; stad?: string }>;
@@ -41,12 +42,6 @@ export default async function ResultatenPage({ searchParams }: Props) {
   ).filter(Boolean);
 
   const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
-
-  const titleMap: Record<string, string> = {
-    vent: "Lekker ventje",
-    griet: "Lekker grietje",
-    neutraal: "Toppertje",
-  };
 
   // Look up the city by slug if one was selected, so we can filter results.
   let cityId: string | null = null;
@@ -103,7 +98,9 @@ export default async function ResultatenPage({ searchParams }: Props) {
             )
           `)
           .eq("status", "published")
-          .in("id", locationIds);
+          .in("id", locationIds)
+          .order("created_at", { ascending: false })
+          .limit(50);
         if (cityId) locationsQuery = locationsQuery.eq("city_id", cityId);
         const { data: locations } = await locationsQuery;
 
@@ -118,10 +115,7 @@ export default async function ResultatenPage({ searchParams }: Props) {
               name: lt.tags?.name || "",
             })),
             toppertjeName: loc.users?.display_name,
-            toppertjeTitle:
-              loc.users?.role === "toppertje" || loc.users?.role === "admin" || loc.users?.role === "superadmin"
-                ? titleMap[loc.users?.pronoun || "neutraal"]
-                : undefined,
+            toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
           }));
         }
       }
@@ -149,7 +143,8 @@ export default async function ResultatenPage({ searchParams }: Props) {
         )
       `)
       .eq("status", "published")
-      .limit(20);
+      .order("created_at", { ascending: false })
+      .limit(50);
     if (cityId) locationsQuery = locationsQuery.eq("city_id", cityId);
     const { data: locations } = await locationsQuery;
 
@@ -164,10 +159,7 @@ export default async function ResultatenPage({ searchParams }: Props) {
           name: lt.tags?.name || "",
         })),
         toppertjeName: loc.users?.display_name,
-        toppertjeTitle:
-          loc.users?.role === "toppertje" || loc.users?.role === "admin" || loc.users?.role === "superadmin"
-            ? titleMap[loc.users?.pronoun || "neutraal"]
-            : undefined,
+        toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
       }));
     }
   }

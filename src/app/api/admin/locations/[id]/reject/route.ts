@@ -23,7 +23,7 @@ export async function POST(_request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  await recordAuditEvent({
+  await recordAuditEvent(ctx.admin, {
     adminId: ctx.adminId,
     action: "reject_location",
     targetType: "location",

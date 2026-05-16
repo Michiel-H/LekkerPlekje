@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { DISPLAY_NAME_MAX, validateDisplayName } from "@/lib/displayName";
 
 type Pronoun = "vent" | "griet" | "neutraal";
 
@@ -35,10 +36,36 @@ export default function SettingsForm({
   async function saveProfile() {
     setSavingProfile(true);
     setProfileMsg(null);
+
+    const validationError = validateDisplayName(displayName);
+    if (validationError) {
+      setProfileMsg(validationError);
+      setSavingProfile(false);
+      return;
+    }
+
     const supabase = createClient();
+    const trimmedName = displayName.trim();
+
+    // Only run the uniqueness check when the name actually changed —
+    // skip the round trip on no-op saves and avoid matching the user's own row.
+    if (trimmedName.toLowerCase() !== initialName.toLowerCase()) {
+      const { data: existing } = await supabase
+        .from("users")
+        .select("id")
+        .ilike("display_name", trimmedName)
+        .neq("id", userId)
+        .limit(1);
+      if (existing && existing.length > 0) {
+        setProfileMsg("Deze gebruikersnaam is al in gebruik. Kies een andere.");
+        setSavingProfile(false);
+        return;
+      }
+    }
+
     const { error } = await supabase
       .from("users")
-      .update({ display_name: displayName, pronoun } as never)
+      .update({ display_name: trimmedName, pronoun } as never)
       .eq("id", userId);
     setSavingProfile(false);
     if (error) {
@@ -103,10 +130,14 @@ export default function SettingsForm({
         </label>
         <input
           type="text"
+          maxLength={DISPLAY_NAME_MAX}
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-2.5 text-sm text-espresso focus:outline-none focus:ring-2 focus:ring-spritz/50"
         />
+        <p className="mt-1 text-xs text-espresso-light/70">
+          3–24 tekens, alleen letters, cijfers, _ en -
+        </p>
 
         <label className="block text-sm font-medium text-espresso mt-4 mb-2">
           Hoe wil je genoemd worden?
