@@ -7,7 +7,11 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+// DEBUG: temporary hardcoded fallback to confirm Vercel's Turbopack is
+// loading this file. Remove once env-var inlining is verified to work.
+const dsn =
+  process.env.NEXT_PUBLIC_SENTRY_DSN ??
+  "https://3effd261007c193863004e6e19bb0e6f@o4511376878862336.ingest.de.sentry.io/4511376884301904";
 
 if (dsn) {
   Sentry.init({
