@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
+import SentryBoot from "@/components/SentryBoot";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -55,7 +56,10 @@ export default function RootLayout({
       lang="nl"
       className={`${fraunces.variable} ${manrope.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <SentryBoot />
+        {children}
+      </body>
     </html>
   );
 }

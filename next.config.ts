@@ -32,21 +32,15 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Sentry build-time integration. Source-map upload is gated on SENTRY_AUTH_TOKEN
-// — without it, errors still report but show minified frames. Add the token in
-// Vercel env (Sentry → Settings → Auth Tokens) to enable readable stack traces.
+// Sentry build-time wrapper — kept minimal so it doesn't fight Turbopack.
+// `tunnelRoute`, `disableLogger`, `widenClientFileUpload` are webpack-only
+// (Sentry warns about them under Turbopack); removing them avoids any
+// side-effect that might prevent instrumentation-client.ts from being bundled.
 export default withSentryConfig(nextConfig, {
   org: "lekkerplekje",
   project: "javascript-nextjs",
-  // Suppress Sentry's own build-time logging — keeps `next build` output clean.
   silent: !process.env.CI,
-  // Upload source maps only when an auth token is present.
   sourcemaps: {
     disable: !process.env.SENTRY_AUTH_TOKEN,
   },
-  // Hide source-map files from the public bundle even when uploading.
-  widenClientFileUpload: true,
-  // Route browser requests through /monitoring so ad-blockers don't drop them.
-  tunnelRoute: "/monitoring",
-  disableLogger: true,
 });
