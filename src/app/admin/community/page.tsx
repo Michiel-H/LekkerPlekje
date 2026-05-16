@@ -12,7 +12,10 @@ export default async function CommunityPage() {
       </p>
 
       <div className="mt-8">
-        <CommunityTable currentUserRole={currentUser?.role ?? "admin"} />
+        <CommunityTable
+          currentUserRole={currentUser?.role ?? "admin"}
+          currentUserId={currentUser?.id ?? ""}
+        />
       </div>
     </div>
   );

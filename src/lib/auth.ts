@@ -9,6 +9,7 @@ interface UserProfile {
   role: UserRole;
   approved_count: number;
   created_at: string;
+  banned_at: string | null;
   preferred_city_id?: string | null;
   avatar_url?: string | null;
   bio?: string | null;
@@ -43,6 +44,7 @@ export const getCurrentUser = cache(async (): Promise<UserProfile | null> => {
     role: "user",
     approved_count: 0,
     created_at: authUser.created_at,
+    banned_at: null,
   } as UserProfile;
 });
 

@@ -16,6 +16,7 @@ export interface Database {
           role: UserRole;
           approved_count: number;
           created_at: string;
+          banned_at: string | null;
         };
         Insert: {
           id: string;
@@ -23,12 +24,14 @@ export interface Database {
           pronoun?: Pronoun;
           role?: UserRole;
           approved_count?: number;
+          banned_at?: string | null;
         };
         Update: Partial<{
           display_name: string;
           pronoun: Pronoun;
           role: UserRole;
           approved_count: number;
+          banned_at: string | null;
         }>;
       };
       cities: {
