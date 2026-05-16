@@ -27,7 +27,7 @@ export default function HeaderClient({ user, isAdmin }: Props) {
             <img
               src="/logo.png?v=4"
               alt="LekkerPlekje"
-              className="h-10 w-auto"
+              className="h-14 w-auto"
             />
           </Link>
 
