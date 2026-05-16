@@ -19,6 +19,7 @@ export default function VoteButtons({
   const [vote, setVote] = useState<"up" | "down" | null>(null);
   const [lekkerCount, setLekkerCount] = useState(initialLekker);
   const [nietLekkerCount, setNietLekkerCount] = useState(initialNietLekker);
+  const [banned, setBanned] = useState(false);
 
   // Load current user's existing vote and subscribe to live changes
   useEffect(() => {
@@ -36,17 +37,25 @@ export default function VoteButtons({
       } = await supabase.auth.getUser();
       if (!user || cancelled) return;
 
-      const { data } = await supabase
-        .from("votes")
-        .select("vote_type")
-        .eq("user_id", user.id)
-        .eq("location_tag_id", locationTagId)
-        .maybeSingle();
+      const [voteRes, profileRes] = await Promise.all([
+        supabase
+          .from("votes")
+          .select("vote_type")
+          .eq("user_id", user.id)
+          .eq("location_tag_id", locationTagId)
+          .maybeSingle(),
+        supabase
+          .from("users")
+          .select("banned_at")
+          .eq("id", user.id)
+          .maybeSingle(),
+      ]);
 
       if (cancelled) return;
-      const v = (data as any)?.vote_type;
+      const v = (voteRes.data as any)?.vote_type;
       if (v === "up") setVote("up");
       else if (v === "down") setVote("down");
+      setBanned(!!(profileRes.data as any)?.banned_at);
     }
 
     async function refreshCounts() {
@@ -90,6 +99,7 @@ export default function VoteButtons({
 
   async function handleVote(type: "up" | "down") {
     if (!isUuid(locationTagId)) return;
+    if (banned) return;
     const supabase = createClient();
     const {
       data: { user },
@@ -143,13 +153,22 @@ export default function VoteButtons({
   const total = lekkerCount + nietLekkerCount;
   const lekkerPct = total > 0 ? (lekkerCount / total) * 100 : 0;
 
+  const disabledTitle = banned
+    ? "Je account is verbannen — stemmen is niet mogelijk."
+    : undefined;
+
   return (
     <div className="flex flex-col gap-2 w-full">
       <div className="flex items-center justify-end gap-2">
         <button
           onClick={() => handleVote("up")}
+          disabled={banned}
+          title={disabledTitle}
+          aria-disabled={banned}
           className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
-            vote === "up"
+            banned
+              ? "bg-frisgroen/10 text-frisgroen/50 cursor-not-allowed"
+              : vote === "up"
               ? "bg-frisgroen text-white"
               : "bg-frisgroen/10 text-frisgroen hover:bg-frisgroen/20"
           }`}
@@ -158,8 +177,13 @@ export default function VoteButtons({
         </button>
         <button
           onClick={() => handleVote("down")}
+          disabled={banned}
+          title={disabledTitle}
+          aria-disabled={banned}
           className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
-            vote === "down"
+            banned
+              ? "bg-koraal/10 text-koraal/50 cursor-not-allowed"
+              : vote === "down"
               ? "bg-koraal text-white"
               : "bg-koraal/10 text-koraal hover:bg-koraal/20"
           }`}

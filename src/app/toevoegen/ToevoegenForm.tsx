@@ -30,10 +30,31 @@ export default function ToevoegenForm() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [banned, setBanned] = useState(false);
   const router = useRouter();
 
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const supabase = createClient();
+    (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user || !active) return;
+      const { data } = await supabase
+        .from("users")
+        .select("banned_at")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (active && (data as any)?.banned_at) setBanned(true);
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -114,6 +135,21 @@ export default function ToevoegenForm() {
       setError("Je moet ingelogd zijn om een plekje toe te voegen.");
       setLoading(false);
       router.push("/login");
+      return;
+    }
+
+    // Re-check ban status server-side at submit time — covers the case where
+    // the admin banned the user between page load and submit. The DB RLS is
+    // the ultimate authority; this just gives a friendly message.
+    const { data: profileRow } = await supabase
+      .from("users")
+      .select("banned_at")
+      .eq("id", user.id)
+      .maybeSingle();
+    if ((profileRow as any)?.banned_at) {
+      setBanned(true);
+      setError("Je account is verbannen — plekjes toevoegen is niet mogelijk.");
+      setLoading(false);
       return;
     }
 
@@ -267,6 +303,22 @@ export default function ToevoegenForm() {
           >
             Nog een plekje toevoegen
           </Button>
+      </main>
+    );
+  }
+
+  if (banned) {
+    return (
+      <main className="flex-1 px-4 py-16">
+        <div className="mx-auto max-w-md text-center">
+          <h1 className="font-display text-2xl font-bold text-espresso">
+            Je account is verbannen
+          </h1>
+          <p className="mt-2 text-espresso-light">
+            Je kan op dit moment geen plekjes toevoegen. Neem contact op met
+            een beheerder als je denkt dat dit een fout is.
+          </p>
+        </div>
       </main>
     );
   }
