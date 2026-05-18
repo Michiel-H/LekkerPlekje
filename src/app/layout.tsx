@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope } from "next/font/google";
+import { Nunito } from "next/font/google";
 import "./globals.css";
 import SentryBoot from "@/components/SentryBoot";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+// Nunito matches the rounded, friendly feel of the LekkerPlekje wordmark.
+// One font for the whole site — headings use the heavier weights.
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
   display: "swap",
-});
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-  display: "swap",
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lekkerplekje.com";
@@ -54,7 +51,7 @@ export default function RootLayout({
   return (
     <html
       lang="nl"
-      className={`${fraunces.variable} ${manrope.variable} h-full antialiased`}
+      className={`${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <SentryBoot />

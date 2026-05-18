@@ -12,15 +12,15 @@
   --color-koraal: #F87171;
   --color-background: var(--color-creme);
   --color-foreground: var(--color-espresso);
-  --font-display: var(--font-fraunces);
-  --font-body: var(--font-manrope);
-  --font-sans: var(--font-manrope);
+  --font-display: var(--font-nunito);
+  --font-body: var(--font-nunito);
+  --font-sans: var(--font-nunito);
 }
 
 body {
   background: var(--color-creme);
   color: var(--color-espresso);
-  font-family: var(--font-body), system-ui, sans-serif;
+  font-family: var(--font-nunito), system-ui, sans-serif;
 }
 
 @keyframes breathe {
@@ -32,6 +32,10 @@ body {
   animation: breathe 2.5s ease-in-out infinite;
 }
 
+/* Headings still use the same font but with the heavier weight that
+   matches the wordmark. The `font-display` Tailwind utility keeps working. */
 h1, h2, h3, h4 {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-nunito), system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
