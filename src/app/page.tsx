@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MadLibsSearch from "@/components/MadLibsSearch";
-import PlekjeCard from "@/components/PlekjeCard";
+import HomePlekjesGrid from "./HomePlekjesGrid";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getFavoritedSet } from "@/lib/favorites";
@@ -34,7 +34,8 @@ export default async function Home() {
       )
     `)
     .eq("status", "published")
-    .limit(6);
+    .order("created_at", { ascending: false })
+    .limit(12);
 
   if (currentUser?.preferred_city_id) {
     query = query.eq("city_id", currentUser.preferred_city_id);
@@ -119,22 +120,11 @@ export default async function Home() {
               </p>
             </div>
 
-            {plekjes.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {plekjes.map((plekje: any) => (
-                  <PlekjeCard key={plekje.id} {...plekje} />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl bg-white border border-espresso/8 p-12 text-center max-w-lg mx-auto">
-                <p className="font-display text-lg font-semibold text-espresso">
-                  Nog geen plekjes getipt
-                </p>
-                <p className="mt-2 text-sm text-espresso-light">
-                  Word de eerste die een lekker plekje deelt met de community!
-                </p>
-              </div>
-            )}
+            <HomePlekjesGrid
+              initialPlekjes={plekjes}
+              cityId={currentUser?.preferred_city_id ?? null}
+              currentUserId={currentUser?.id ?? null}
+            />
           </div>
         </section>
 
