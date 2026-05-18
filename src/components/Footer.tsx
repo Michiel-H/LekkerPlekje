@@ -100,7 +100,7 @@ export default function Footer() {
             </a>
           </p>
           <p className="text-espresso-light/70">
-            Gemaakt in Nederland ♥ door mensen die ook gewoon een leuk terras zoeken.
+            Gemaakt in Amsterdam
           </p>
         </div>
       </div>
