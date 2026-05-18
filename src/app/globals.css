@@ -1,15 +1,31 @@
 @import "tailwindcss";
 
+/*
+ * Brand palette — "Limoncello & Zonneschijn"
+ * Bright sunshine yellow base, summery and energetic.
+ *
+ * The original CSS-variable names (spritz, creme, espresso, groen, frisgroen,
+ * koraal) are kept so we don't have to rewrite hundreds of utility classes
+ * across the codebase. Their HEX values now point at the new palette.
+ *
+ *   --color-spritz       Zonsondergang-Oranje #FF6B35   CTA's
+ *   --color-creme        Limoncello-Crème     #FFF4D6   achtergrond
+ *   --color-espresso     Cacao-Donker         #2B1810   tekst
+ *   --color-groen        Zwembad-Blauw        #00B4D8   tags & accenten
+ *                                                       (name is legacy — now blue!)
+ *   --color-frisgroen    Munt-Groen           #06D6A0   👍 Lekker
+ *   --color-koraal       Kers-Rood            #E63946   👎 Niet lekker
+ */
 @theme inline {
-  --color-spritz: #FF7E67;
-  --color-spritz-hover: #E8674F;
-  --color-creme: #FDFBF7;
-  --color-espresso: #2C2119;
-  --color-espresso-light: #5C4A3A;
-  --color-groen: #4A8B71;
-  --color-groen-hover: #3A7A60;
-  --color-frisgroen: #34D399;
-  --color-koraal: #F87171;
+  --color-spritz: #FF6B35;
+  --color-spritz-hover: #E85829;
+  --color-creme: #FFF4D6;
+  --color-espresso: #2B1810;
+  --color-espresso-light: #5C4030;
+  --color-groen: #00B4D8;
+  --color-groen-hover: #0096B3;
+  --color-frisgroen: #06D6A0;
+  --color-koraal: #E63946;
   --color-background: var(--color-creme);
   --color-foreground: var(--color-espresso);
   --font-display: var(--font-nunito);
@@ -24,8 +40,8 @@ body {
 }
 
 @keyframes breathe {
-  0%, 100% { box-shadow: 0 4px 20px rgba(255, 126, 103, 0.25); }
-  50% { box-shadow: 0 4px 30px rgba(255, 126, 103, 0.45); }
+  0%, 100% { box-shadow: 0 4px 20px rgba(255, 107, 53, 0.25); }
+  50% { box-shadow: 0 4px 30px rgba(255, 107, 53, 0.45); }
 }
 
 .animate-breathe {
