@@ -335,7 +335,7 @@ export default function ToevoegenForm() {
           </p>
 
           {error && (
-            <div className="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            <div className="mt-4 rounded-xl bg-koraal/10 border border-koraal/30 px-4 py-3 text-sm text-koraal">
               {error}
             </div>
           )}
