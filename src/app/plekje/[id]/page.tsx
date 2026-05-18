@@ -82,6 +82,7 @@ export default async function PlekjeDetailPage({ params }: Props) {
         neighborhood,
         image_url,
         submitted_by,
+        favorites_count,
         cities (name),
         location_tags (
           id,
@@ -119,6 +120,7 @@ export default async function PlekjeDetailPage({ params }: Props) {
         })),
         toppertjeName: loc.users?.display_name,
         toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
+        favoritesCount: loc.favorites_count ?? 0,
       };
     }
   }
@@ -210,7 +212,11 @@ export default async function PlekjeDetailPage({ params }: Props) {
                 </p>
               )}
             </div>
-            <FavoriteButton locationId={plekje.id} size="md" />
+            <FavoriteButton
+              locationId={plekje.id}
+              size="md"
+              initialCount={plekje.favoritesCount}
+            />
           </div>
 
           {/* Toppertje credit */}

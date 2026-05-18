@@ -20,6 +20,7 @@ export default async function Home() {
       image_url,
       submitted_by,
       city_id,
+      favorites_count,
       location_tags (
         tags (
           name,
@@ -79,6 +80,7 @@ export default async function Home() {
               : undefined,
           initialFavorited: favoritedSet.has(loc.id),
           currentUserId: currentUser?.id ?? null,
+          favoritesCount: loc.favorites_count ?? 0,
         }))
       : [];
 

@@ -39,7 +39,7 @@ export default async function ProfielPage() {
     supabase
       .from("locations")
       .select(
-        `id, name, neighborhood, image_url, status, created_at,
+        `id, name, neighborhood, image_url, status, created_at, favorites_count,
          location_tags (tags (name, emoji))`
       )
       .eq("submitted_by", user.id)
@@ -49,7 +49,7 @@ export default async function ProfielPage() {
       .select(
         `location_id,
          locations (
-           id, name, neighborhood, image_url, status,
+           id, name, neighborhood, image_url, status, favorites_count,
            location_tags (tags (name, emoji)),
            users!locations_submitted_by_fkey (display_name, pronoun, role)
          )`
@@ -85,6 +85,7 @@ export default async function ProfielPage() {
       toppertjeName: user!.display_name,
       toppertjeTitle: userIsToppertje ? toppertjeTitle(user!.pronoun) : undefined,
       currentUserId: user!.id,
+      favoritesCount: loc.favorites_count ?? 0,
     };
   }
 
@@ -105,6 +106,7 @@ export default async function ProfielPage() {
       // All items in "Opgeslagen" are by definition favorited
       initialFavorited: true,
       currentUserId: user!.id,
+      favoritesCount: loc.favorites_count ?? 0,
     }));
 
   // Smaak-score: % of "up" votes across the user's location_tags

@@ -7,7 +7,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState("");
+  // "identifier" can be either an email or a username — we resolve it to an
+  // email server-side before calling signInWithPassword.
+  const [identifier, setIdentifier] = useState("");
+  const [resolvedEmail, setResolvedEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [needsConfirm, setNeedsConfirm] = useState(false);
@@ -24,9 +27,30 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
+      const trimmed = identifier.trim();
+      let emailToUse = trimmed;
+
+      // If the identifier doesn't look like an email, treat it as a username
+      // and resolve to the underlying email via the admin route.
+      if (!trimmed.includes("@")) {
+        const res = await fetch("/api/auth/resolve-username", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: trimmed }),
+        });
+        if (!res.ok) {
+          setError("E-mailadres of wachtwoord klopt niet.");
+          setLoading(false);
+          return;
+        }
+        const data = await res.json();
+        emailToUse = data.email;
+      }
+      setResolvedEmail(emailToUse);
+
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: emailToUse,
         password,
       });
 
@@ -61,13 +85,14 @@ export default function LoginForm() {
   }
 
   async function resendConfirmation() {
-    if (!email) return;
+    const target = resolvedEmail || identifier;
+    if (!target || !target.includes("@")) return;
     setResending(true);
     setResendMsg(null);
     const supabase = createClient();
     const { error } = await supabase.auth.resend({
       type: "signup",
-      email,
+      email: target,
       options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     });
     setResending(false);
@@ -103,7 +128,7 @@ export default function LoginForm() {
               </p>
               <p className="mt-1 text-espresso-light">
                 We hebben een bevestigingsmail gestuurd naar{" "}
-                <strong className="text-espresso">{email}</strong>. Klik op de
+                <strong className="text-espresso">{resolvedEmail || identifier}</strong>. Klik op de
                 link in die mail om je account te activeren.
               </p>
               <button
@@ -123,14 +148,15 @@ export default function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-espresso mb-1.5">
-                E-mailadres
+                E-mailadres of gebruikersnaam
               </label>
               <input
-                type="email"
+                type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="je@email.nl"
+                autoComplete="username"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="je@email.nl of je gebruikersnaam"
                 className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso placeholder:text-espresso-light/50 focus:outline-none focus:ring-2 focus:ring-spritz/50"
               />
             </div>

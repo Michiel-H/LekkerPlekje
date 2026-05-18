@@ -22,14 +22,25 @@ export default function HeaderClient({ user, isAdmin }: Props) {
     <header className="sticky top-0 z-50 bg-creme/95 backdrop-blur-sm border-b border-espresso/10">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center" aria-label="LekkerPlekje">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo.png?v=4"
-              alt="LekkerPlekje"
-              className="h-14 w-auto"
-            />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center" aria-label="LekkerPlekje">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.png?v=4"
+                alt="LekkerPlekje"
+                className="h-14 w-auto"
+              />
+            </Link>
+            <Link
+              href="/"
+              className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-espresso/5 px-3 py-1.5 text-sm font-medium text-espresso hover:bg-espresso/10 transition-colors"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+              </svg>
+              Startpagina
+            </Link>
+          </div>
 
           <nav className="hidden md:flex items-center gap-6">
             <Link
@@ -124,6 +135,16 @@ export default function HeaderClient({ user, isAdmin }: Props) {
 
         {menuOpen && (
           <nav className="md:hidden pb-4 flex flex-col gap-3">
+            <Link
+              href="/"
+              className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-espresso hover:text-spritz"
+              onClick={() => setMenuOpen(false)}
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+              </svg>
+              Startpagina
+            </Link>
             <Link
               href="/hoe-het-werkt"
               className="text-sm font-semibold text-espresso hover:text-spritz"

@@ -16,7 +16,10 @@ export function validateDisplayName(name: string): string | null {
     return `Gebruikersnaam moet minimaal ${DISPLAY_NAME_MIN} tekens zijn.`;
   if (trimmed.length > DISPLAY_NAME_MAX)
     return `Gebruikersnaam mag maximaal ${DISPLAY_NAME_MAX} tekens zijn.`;
+  // Check space first — most common mistake, deserves a dedicated message
+  if (/\s/.test(trimmed))
+    return "Gebruikersnaam mag geen spaties bevatten.";
   if (!DISPLAY_NAME_RE.test(trimmed))
-    return "Alleen letters, cijfers, _ en - zijn toegestaan.";
+    return "Gebruikersnaam mag alleen letters, cijfers, _ en - bevatten.";
   return null;
 }

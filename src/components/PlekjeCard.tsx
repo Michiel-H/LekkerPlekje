@@ -13,6 +13,8 @@ interface PlekjeCardProps {
   /** Pass-through to FavoriteButton to avoid per-card auth/favorites round trip */
   initialFavorited?: boolean;
   currentUserId?: string | null;
+  /** Denormalised favourite total — when provided, the heart shows the count */
+  favoritesCount?: number;
 }
 
 export default function PlekjeCard({
@@ -25,6 +27,7 @@ export default function PlekjeCard({
   toppertjeTitle,
   initialFavorited,
   currentUserId,
+  favoritesCount,
 }: PlekjeCardProps) {
   return (
     <Link
@@ -51,6 +54,7 @@ export default function PlekjeCard({
             size="sm"
             initialFavorited={initialFavorited}
             currentUserId={currentUserId}
+            initialCount={favoritesCount}
           />
         </div>
       </div>

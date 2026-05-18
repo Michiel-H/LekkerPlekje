@@ -11,6 +11,9 @@ interface Plekje {
   tags: { emoji: string; name: string }[];
   toppertjeName?: string;
   toppertjeTitle?: string;
+  initialFavorited?: boolean;
+  currentUserId?: string | null;
+  favoritesCount?: number;
 }
 
 interface QueueItem {

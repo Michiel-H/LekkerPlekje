@@ -85,6 +85,7 @@ export default async function ResultatenPage({ searchParams }: Props) {
             neighborhood,
             image_url,
             submitted_by,
+            favorites_count,
             location_tags (
               tags (
                 name,
@@ -116,6 +117,7 @@ export default async function ResultatenPage({ searchParams }: Props) {
             })),
             toppertjeName: loc.users?.display_name,
             toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
+            favoritesCount: loc.favorites_count ?? 0,
           }));
         }
       }
@@ -130,6 +132,7 @@ export default async function ResultatenPage({ searchParams }: Props) {
         neighborhood,
         image_url,
         submitted_by,
+        favorites_count,
         location_tags (
           tags (
             name,
@@ -160,6 +163,7 @@ export default async function ResultatenPage({ searchParams }: Props) {
         })),
         toppertjeName: loc.users?.display_name,
         toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
+        favoritesCount: loc.favorites_count ?? 0,
       }));
     }
   }
