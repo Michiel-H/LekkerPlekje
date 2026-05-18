@@ -58,10 +58,10 @@ export default function MadLibsSearch() {
   }
 
   const slotClass = (value: string) =>
-    `inline-block cursor-pointer border-b-2 transition-colors ${
+    `inline-block cursor-pointer border-b-[3px] transition-colors ${
       value
         ? "border-spritz text-spritz font-semibold"
-        : "border-espresso/30 text-espresso-light"
+        : "border-espresso/60 text-espresso-light hover:border-espresso"
     }`;
 
   const getVibeLabel = (slug: string) => VIBE_TAGS.find((t) => t.slug === slug);

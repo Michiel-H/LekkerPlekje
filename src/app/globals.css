@@ -9,7 +9,7 @@
  * across the codebase. Their HEX values now point at the new palette.
  *
  *   --color-spritz       Zonsondergang-Oranje #FF6B35   CTA's
- *   --color-creme        Limoncello-Crème     #FFF4D6   achtergrond
+ *   --color-creme        Limoncello-Crème     #FFF8E1   achtergrond
  *   --color-espresso     Cacao-Donker         #2B1810   tekst
  *   --color-groen        Zwembad-Blauw        #00B4D8   tags & accenten
  *                                                       (name is legacy — now blue!)
@@ -19,7 +19,7 @@
 @theme inline {
   --color-spritz: #FF6B35;
   --color-spritz-hover: #E85829;
-  --color-creme: #FFF4D6;
+  --color-creme: #FFF8E1;
   --color-espresso: #2B1810;
   --color-espresso-light: #5C4030;
   --color-groen: #00B4D8;
