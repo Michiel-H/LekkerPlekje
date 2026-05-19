@@ -439,8 +439,9 @@ export default function ToevoegenForm() {
 
             {/* Photo */}
             <div>
-              <label className="block text-sm font-medium text-espresso mb-1.5">
-                Voeg een foto toe
+              <label className="flex items-center gap-1 text-sm font-medium text-espresso mb-1.5">
+                Foto van het plekje
+                <span className="text-koraal" aria-label="verplicht">*</span>
               </label>
               <input
                 type="file"
@@ -451,11 +452,21 @@ export default function ToevoegenForm() {
                     setPhoto(e.target.files[0]);
                   }
                 }}
-                className="w-full rounded-xl border border-espresso/15 bg-white px-4 py-3 text-sm text-espresso file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-spritz/10 file:text-spritz hover:file:bg-spritz/20 focus:outline-none focus:ring-2 focus:ring-spritz/50"
+                className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-espresso file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-spritz/10 file:text-spritz hover:file:bg-spritz/20 focus:outline-none focus:ring-2 ${
+                  photo
+                    ? "border-frisgroen/40 focus:ring-frisgroen/50"
+                    : "border-espresso/15 focus:ring-spritz/50"
+                }`}
               />
-              <p className="mt-1 text-xs text-espresso-light">
-                Zorg voor een sfeervolle of duidelijke foto van het plekje (verplicht). JPG, PNG of WebP, max 10 MB.
-              </p>
+              {photo ? (
+                <p className="mt-1 text-xs text-frisgroen font-medium">
+                  ✓ {photo.name}
+                </p>
+              ) : (
+                <p className="mt-1 text-xs text-espresso-light">
+                  Een sfeerfoto of duidelijk beeld van het plekje is verplicht. JPG, PNG of WebP, max 10 MB.
+                </p>
+              )}
             </div>
 
             {/* Tags by category */}
@@ -487,15 +498,31 @@ export default function ToevoegenForm() {
             ))}
 
             <div className="pt-2">
-              <Button
-                type="submit"
-                size="lg"
-                disabled={
-                  !name || !address || !city || !neighborhood || !photo || Object.keys(selectedTags).length === 0 || loading
-                }
-              >
-                {loading ? "Bezig met opslaan..." : "Plekje insturen"}
-              </Button>
+              {(() => {
+                const missing: string[] = [];
+                if (!name.trim()) missing.push("naam");
+                if (!address.trim()) missing.push("adres");
+                if (!city.trim()) missing.push("stad");
+                if (!neighborhood.trim()) missing.push("buurt");
+                if (!photo) missing.push("foto");
+                if (Object.keys(selectedTags).length === 0) missing.push("minimaal 1 tag");
+                const isDisabled = missing.length > 0 || loading;
+                return (
+                  <>
+                    <Button type="submit" size="lg" disabled={isDisabled}>
+                      {loading ? "Bezig met opslaan..." : "Plekje insturen"}
+                    </Button>
+                    {missing.length > 0 && !loading && (
+                      <p className="mt-3 text-sm text-espresso-light">
+                        Nog in te vullen:{" "}
+                        <span className="font-medium text-espresso">
+                          {missing.join(", ")}
+                        </span>
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </form>
         </div>

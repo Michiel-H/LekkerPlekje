@@ -61,7 +61,30 @@ export default function PrivacyPage() {
           <p className="mt-2">
             De inhoud van je inzending (locatie, tags, motivatie, foto&apos;s) wordt — na
             goedkeuring — publiek zichtbaar, gekoppeld aan jouw gebruikersnaam. Ook het
-            tijdstip van indienen wordt opgeslagen.
+            tijdstip van indienen wordt opgeslagen. Locatiegegevens uit de foto
+            (EXIF, GPS) verwijderen we automatisch v&oacute;&oacute;r publicatie.
+          </p>
+          <p className="mt-3">
+            <strong className="text-espresso">
+              Foto&apos;s worden door gebruikers zelf geüpload.
+            </strong>{" "}
+            Wij controleren inzendingen vóór publicatie op het oog, maar zijn{" "}
+            <strong className="text-espresso">
+              niet verantwoordelijk voor privacyschending
+            </strong>{" "}
+            of andere rechteninbreuk in door gebruikers aangeleverde foto&apos;s. Sta
+            je herkenbaar in beeld of zie je inhoud waar jij rechthebbende van bent
+            en wil je die verwijderd hebben? Mail{" "}
+            <a href="mailto:contact@lekkerplekje.com" className="text-spritz hover:underline">
+              contact@lekkerplekje.com
+            </a>{" "}
+            of gebruik de meld-knop op de detailpagina — we halen de foto na
+            verzoek zo snel mogelijk weg (in beginsel binnen 48 uur). Zie ook
+            onze{" "}
+            <a href="/voorwaarden" className="text-spritz hover:underline">
+              algemene voorwaarden
+            </a>{" "}
+            voor de regels rondom uploads.
           </p>
 
           <h3 className="font-semibold text-espresso mt-6">Als je stemt op tags</h3>

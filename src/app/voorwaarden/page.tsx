@@ -88,6 +88,42 @@ export default function VoorwaardenPage() {
             </li>
           </ul>
 
+          <h3 className="font-semibold text-espresso mt-6">
+            Verantwoordelijkheid voor foto&apos;s
+          </h3>
+          <p className="mt-2">
+            De foto&apos;s op LekkerPlekje worden door gebruikers zelf geüpload. Jij
+            bent als inzender zélf verantwoordelijk voor de inhoud die je
+            uploadt. Dat betekent onder andere:
+          </p>
+          <ul className="mt-2 list-disc pl-5 space-y-1">
+            <li>
+              Geen foto&apos;s waarop herkenbare personen staan zonder dat zij daarvoor
+              toestemming hebben gegeven (portretrecht).
+            </li>
+            <li>
+              Geen foto&apos;s waarmee je inbreuk maakt op auteursrecht, merkenrecht of
+              andere rechten van derden.
+            </li>
+            <li>
+              Geen privé-informatie van anderen in beeld (kentekens, huisnummers
+              waar nadrukkelijk woonadressen mee gekoppeld zijn, etc.).
+            </li>
+          </ul>
+          <p className="mt-3">
+            LekkerPlekje is een platform en is{" "}
+            <strong className="text-espresso">
+              niet aansprakelijk voor privacyschending of andere rechteninbreuk
+            </strong>{" "}
+            die voortvloeit uit door gebruikers ge&uuml;ploade foto&apos;s. Sta je
+            herkenbaar op een foto en wil je dat die wordt verwijderd? Mail{" "}
+            <a href="mailto:contact@lekkerplekje.com" className="text-spritz hover:underline">
+              contact@lekkerplekje.com
+            </a>
+            {" "}of gebruik de meld-knop op de detailpagina — we halen de foto na
+            verzoek zo snel mogelijk weg, in beginsel binnen 48 uur.
+          </p>
+
           <h3 className="font-semibold text-espresso mt-6">Wat je niet mag inzenden</h3>
           <ul className="mt-2 list-disc pl-5 space-y-1">
             <li>Plekken die alleen op afspraak of voor leden toegankelijk zijn.</li>
