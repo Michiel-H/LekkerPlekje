@@ -162,9 +162,17 @@ export default function LoginForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-espresso mb-1.5">
-                Wachtwoord
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-medium text-espresso">
+                  Wachtwoord
+                </label>
+                <Link
+                  href="/wachtwoord-vergeten"
+                  className="text-xs font-medium text-spritz hover:text-spritz-hover"
+                >
+                  Wachtwoord vergeten?
+                </Link>
+              </div>
               <input
                 type="password"
                 required
