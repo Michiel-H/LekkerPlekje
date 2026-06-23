@@ -5,6 +5,7 @@ import HomePlekjesGrid from "./HomePlekjesGrid";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getFavoritedSet } from "@/lib/favorites";
+import { flairFor } from "@/lib/rewards";
 
 export default async function Home() {
   const currentUser = await getCurrentUser();
@@ -30,7 +31,8 @@ export default async function Home() {
       users!locations_submitted_by_fkey (
         display_name,
         pronoun,
-        role
+        role,
+        points
       )
     `)
     .eq("status", "published")
@@ -57,11 +59,6 @@ export default async function Home() {
   const locationIds = (locations || []).map((l: any) => l.id);
   const favoritedSet = await getFavoritedSet(currentUser?.id ?? null, locationIds);
 
-  const titleMap: Record<string, string> = {
-    vent: "Lekker ventje",
-    griet: "Lekker grietje",
-    neutraal: "Toppertje",
-  };
 
   const plekjes =
     locations && locations.length > 0
@@ -75,10 +72,11 @@ export default async function Home() {
             name: lt.tags?.name || "",
           })),
           toppertjeName: loc.users?.display_name,
-          toppertjeTitle:
-            loc.users?.role === "toppertje" || loc.users?.role === "admin" || loc.users?.role === "superadmin"
-              ? titleMap[loc.users?.pronoun || "neutraal"]
-              : undefined,
+          toppertjeTitle: flairFor({
+            role: loc.users?.role,
+            pronoun: loc.users?.pronoun,
+            points: loc.users?.points,
+          }),
           initialFavorited: favoritedSet.has(loc.id),
           currentUserId: currentUser?.id ?? null,
           favoritesCount: loc.favorites_count ?? 0,

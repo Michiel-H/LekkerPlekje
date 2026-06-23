@@ -3,6 +3,7 @@
 import { useState } from "react";
 import PlekjeCard from "@/components/PlekjeCard";
 import { createClient } from "@/lib/supabase/client";
+import { flairFor } from "@/lib/rewards";
 
 export interface HomePlekje {
   id: string;
@@ -27,19 +28,6 @@ interface Props {
 
 const PAGE_SIZE = 12;
 
-const TITLE_MAP: Record<string, string> = {
-  vent: "Lekker ventje",
-  griet: "Lekker grietje",
-  neutraal: "Toppertje",
-};
-
-function toppertjeTitleForRole(role?: string, pronoun?: string) {
-  if (role === "toppertje" || role === "admin" || role === "superadmin") {
-    return TITLE_MAP[pronoun || "neutraal"];
-  }
-  return undefined;
-}
-
 export default function HomePlekjesGrid({
   initialPlekjes,
   cityId,
@@ -61,7 +49,7 @@ export default function HomePlekjesGrid({
         .select(
           `id, name, neighborhood, image_url, submitted_by, city_id, favorites_count,
            location_tags (tags (name, emoji)),
-           users!locations_submitted_by_fkey (display_name, pronoun, role)`
+           users!locations_submitted_by_fkey (display_name, pronoun, role, points)`
         )
         .eq("status", "published")
         .order("created_at", { ascending: false })
@@ -96,7 +84,11 @@ export default function HomePlekjesGrid({
           name: lt.tags?.name || "",
         })),
         toppertjeName: loc.users?.display_name,
-        toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
+        toppertjeTitle: flairFor({
+          role: loc.users?.role,
+          pronoun: loc.users?.pronoun,
+          points: loc.users?.points,
+        }),
         initialFavorited: favoritedSet.has(loc.id),
         currentUserId,
         favoritesCount: loc.favorites_count ?? 0,

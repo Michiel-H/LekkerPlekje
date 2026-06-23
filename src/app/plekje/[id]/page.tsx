@@ -7,7 +7,7 @@ import VoteButtons from "./VoteButtons";
 import FavoriteButton from "@/components/FavoriteButton";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/uuid";
-import { toppertjeTitleForRole } from "@/lib/titleMap";
+import { flairFor } from "@/lib/rewards";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -96,7 +96,8 @@ export default async function PlekjeDetailPage({ params }: Props) {
         users!locations_submitted_by_fkey (
           display_name,
           pronoun,
-          role
+          role,
+          points
         )
       `)
       .eq("id", id)
@@ -119,7 +120,11 @@ export default async function PlekjeDetailPage({ params }: Props) {
           nietLekkerCount: (lt.total_votes || 0) - (lt.score || 0),
         })),
         toppertjeName: loc.users?.display_name,
-        toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
+        toppertjeTitle: flairFor({
+          role: loc.users?.role,
+          pronoun: loc.users?.pronoun,
+          points: loc.users?.points,
+        }),
         favoritesCount: loc.favorites_count ?? 0,
       };
     }

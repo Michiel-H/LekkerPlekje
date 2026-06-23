@@ -8,7 +8,9 @@ import CityPicker from "./CityPicker";
 import AvatarUpload from "./AvatarUpload";
 import BioEditor from "./BioEditor";
 import ProfielTabs from "./ProfielTabs";
-import { isToppertjeLike, toppertjeTitle, toppertjeTitleForRole } from "@/lib/titleMap";
+import RewardsHeader from "@/components/RewardsHeader";
+import { isToppertjeLike, toppertjeTitle } from "@/lib/titleMap";
+import { flairFor } from "@/lib/rewards";
 
 export default async function ProfielPage() {
   const user = await getCurrentUser();
@@ -27,8 +29,12 @@ export default async function ProfielPage() {
 
   const supabase = await createClient();
 
-  // Run the four independent queries in parallel
-  const [cityRes, myLocationsRes, favoritesRes] = await Promise.all([
+  // Award profile-completion points if the profile is now complete (idempotent,
+  // scoped to the signed-in user inside the function via auth.uid()).
+  await supabase.rpc("complete_profile");
+
+  // Run the independent queries in parallel
+  const [cityRes, myLocationsRes, favoritesRes, badgesRes, rewardRes] = await Promise.all([
     user.preferred_city_id
       ? supabase
           .from("cities")
@@ -51,15 +57,31 @@ export default async function ProfielPage() {
          locations (
            id, name, neighborhood, image_url, status, favorites_count,
            location_tags (tags (name, emoji)),
-           users!locations_submitted_by_fkey (display_name, pronoun, role)
+           users!locations_submitted_by_fkey (display_name, pronoun, role, points)
          )`
       )
       .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("user_badges")
+      .select(`badge_slug, badges (slug, name, emoji, sort_order)`)
+      .eq("user_id", user.id),
+    // Fresh reward stats (reflects any award_points fired by complete_profile above).
+    supabase
+      .from("users")
+      .select("points, current_streak")
+      .eq("id", user.id)
+      .single(),
   ]);
   const preferredCityName: string | null = (cityRes.data as any)?.name ?? null;
   const myLocations = myLocationsRes.data;
   const favorites = favoritesRes.data;
+
+  const myBadges = (((badgesRes.data as any[]) || [])
+    .map((r) => r.badges)
+    .filter(Boolean) as { slug: string; name: string; emoji: string; sort_order: number }[])
+    .sort((a, b) => a.sort_order - b.sort_order);
+  const rewardStats = (rewardRes.data as any) ?? { points: 0, current_streak: 0 };
 
   const userIsToppertje = isToppertjeLike(user.role);
 
@@ -83,7 +105,11 @@ export default async function ProfielPage() {
         name: lt.tags?.name || "",
       })),
       toppertjeName: user!.display_name,
-      toppertjeTitle: userIsToppertje ? toppertjeTitle(user!.pronoun) : undefined,
+      toppertjeTitle: flairFor({
+        role: user!.role,
+        pronoun: user!.pronoun,
+        points: rewardStats.points,
+      }),
       currentUserId: user!.id,
       favoritesCount: loc.favorites_count ?? 0,
     };
@@ -102,7 +128,11 @@ export default async function ProfielPage() {
         name: lt.tags?.name || "",
       })),
       toppertjeName: loc.users?.display_name,
-      toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
+      toppertjeTitle: flairFor({
+        role: loc.users?.role,
+        pronoun: loc.users?.pronoun,
+        points: loc.users?.points,
+      }),
       // All items in "Opgeslagen" are by definition favorited
       initialFavorited: true,
       currentUserId: user!.id,
@@ -112,6 +142,7 @@ export default async function ProfielPage() {
   // Smaak-score: % of "up" votes across the user's location_tags
   let smaakScore: number | null = null;
   let smaakTotal = 0;
+  let upvotesReceived = 0;
   if (myPublished.length > 0) {
     const locationIds = myPublished.map((l: any) => l.id);
     const { data: ltRows } = await supabase
@@ -127,6 +158,7 @@ export default async function ProfielPage() {
       { up: 0, total: 0 }
     );
     smaakTotal = totals.total;
+    upvotesReceived = totals.up;
     if (totals.total >= 30) smaakScore = Math.round((totals.up / totals.total) * 100);
   }
 
@@ -135,6 +167,14 @@ export default async function ProfielPage() {
       <Header />
       <main className="flex-1 px-4 py-8 sm:py-12">
         <div className="mx-auto max-w-4xl">
+          <RewardsHeader
+            points={rewardStats.points ?? 0}
+            streak={rewardStats.current_streak ?? 0}
+            badges={myBadges}
+            spots={myPublished.length}
+            upvotes={upvotesReceived}
+          />
+
           {/* Profile header */}
           <div className="flex flex-col sm:flex-row sm:items-start gap-6 mb-8">
             <AvatarUpload

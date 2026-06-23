@@ -14,6 +14,7 @@ const PREF_COLUMN: Record<string, string> = {
   city_live: "notif_city_news",
   digest: "notif_digest",
   reengage: "notif_reengage",
+  reward: "notif_milestones", // level-ups & badges reuse the "mijlpalen" toggle
 };
 // High-value, low-frequency categories bypass the weekly cap.
 const CAP_EXEMPT = new Set(["spot_approved", "city_live"]);

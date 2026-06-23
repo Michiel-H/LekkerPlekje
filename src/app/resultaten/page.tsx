@@ -7,7 +7,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getFavoritedSet } from "@/lib/favorites";
-import { toppertjeTitleForRole } from "@/lib/titleMap";
+import { flairFor } from "@/lib/rewards";
 
 interface Props {
   searchParams: Promise<{ gezelschap?: string; vibe?: string; stad?: string }>;
@@ -95,7 +95,8 @@ export default async function ResultatenPage({ searchParams }: Props) {
             users!locations_submitted_by_fkey (
               display_name,
               pronoun,
-              role
+              role,
+              points
             )
           `)
           .eq("status", "published")
@@ -116,7 +117,11 @@ export default async function ResultatenPage({ searchParams }: Props) {
               name: lt.tags?.name || "",
             })),
             toppertjeName: loc.users?.display_name,
-            toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
+            toppertjeTitle: flairFor({
+              role: loc.users?.role,
+              pronoun: loc.users?.pronoun,
+              points: loc.users?.points,
+            }),
             favoritesCount: loc.favorites_count ?? 0,
           }));
         }
@@ -142,7 +147,8 @@ export default async function ResultatenPage({ searchParams }: Props) {
         users!locations_submitted_by_fkey (
           display_name,
           pronoun,
-          role
+          role,
+          points
         )
       `)
       .eq("status", "published")
@@ -162,7 +168,11 @@ export default async function ResultatenPage({ searchParams }: Props) {
           name: lt.tags?.name || "",
         })),
         toppertjeName: loc.users?.display_name,
-        toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
+        toppertjeTitle: flairFor({
+          role: loc.users?.role,
+          pronoun: loc.users?.pronoun,
+          points: loc.users?.points,
+        }),
         favoritesCount: loc.favorites_count ?? 0,
       }));
     }

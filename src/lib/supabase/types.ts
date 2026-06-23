@@ -22,6 +22,11 @@ export interface Database {
           notif_city_news: boolean;
           notif_digest: boolean;
           notif_reengage: boolean;
+          points: number;
+          level: number;
+          current_streak: number;
+          longest_streak: number;
+          last_active_on: string | null;
         };
         Insert: {
           id: string;
@@ -35,6 +40,11 @@ export interface Database {
           notif_city_news?: boolean;
           notif_digest?: boolean;
           notif_reengage?: boolean;
+          points?: number;
+          level?: number;
+          current_streak?: number;
+          longest_streak?: number;
+          last_active_on?: string | null;
         };
         Update: Partial<{
           display_name: string;
@@ -47,6 +57,11 @@ export interface Database {
           notif_city_news: boolean;
           notif_digest: boolean;
           notif_reengage: boolean;
+          points: number;
+          level: number;
+          current_streak: number;
+          longest_streak: number;
+          last_active_on: string | null;
         }>;
       };
       cities: {
@@ -210,6 +225,63 @@ export interface Database {
           location_id: string;
         }>;
       };
+      point_events: {
+        Row: {
+          id: string;
+          user_id: string;
+          kind: string;
+          points: number;
+          ref_id: string | null;
+          city_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          kind: string;
+          points: number;
+          ref_id?: string | null;
+          city_id?: string | null;
+        };
+        Update: Partial<{
+          points: number;
+        }>;
+      };
+      badges: {
+        Row: {
+          slug: string;
+          name: string;
+          description: string;
+          emoji: string;
+          sort_order: number;
+        };
+        Insert: {
+          slug: string;
+          name: string;
+          description: string;
+          emoji: string;
+          sort_order?: number;
+        };
+        Update: Partial<{
+          name: string;
+          description: string;
+          emoji: string;
+          sort_order: number;
+        }>;
+      };
+      user_badges: {
+        Row: {
+          user_id: string;
+          badge_slug: string;
+          earned_at: string;
+        };
+        Insert: {
+          user_id: string;
+          badge_slug: string;
+        };
+        Update: Partial<{
+          earned_at: string;
+        }>;
+      };
       push_subscriptions: {
         Row: {
           id: string;
@@ -310,6 +382,19 @@ export interface Database {
       enqueue_reengagement: {
         Args: Record<string, never>;
         Returns: number;
+      };
+      complete_profile: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+      get_leaderboard: {
+        Args: { p_period?: string; p_city?: string | null; p_limit?: number };
+        Returns: {
+          user_id: string;
+          display_name: string;
+          level: number;
+          points: number;
+        }[];
       };
     };
     Enums: {

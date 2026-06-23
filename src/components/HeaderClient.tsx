@@ -49,6 +49,12 @@ export default function HeaderClient({ user, isAdmin }: Props) {
             >
               Hoe het werkt
             </Link>
+            <Link
+              href="/toppers"
+              className="text-sm font-semibold text-espresso hover:text-spritz transition-colors"
+            >
+              Toppers
+            </Link>
             <CitiesMenu />
             <Link
               href="/toevoegen"

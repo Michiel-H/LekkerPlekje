@@ -18,6 +18,11 @@ interface UserProfile {
   notif_city_news?: boolean;
   notif_digest?: boolean;
   notif_reengage?: boolean;
+  points?: number;
+  level?: number;
+  current_streak?: number;
+  longest_streak?: number;
+  last_active_on?: string | null;
 }
 
 /**

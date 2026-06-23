@@ -6,7 +6,7 @@ import MadLibsSearch from "@/components/MadLibsSearch";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getFavoritedSet } from "@/lib/favorites";
-import { toppertjeTitleForRole } from "@/lib/titleMap";
+import { flairFor } from "@/lib/rewards";
 
 export const metadata: Metadata = {
   title: "Amsterdam · LekkerPlekje.com",
@@ -47,7 +47,8 @@ export default async function AmsterdamPage() {
           users!locations_submitted_by_fkey (
             display_name,
             pronoun,
-            role
+            role,
+            points
           )
         `)
         .eq("status", "published")
@@ -68,7 +69,11 @@ export default async function AmsterdamPage() {
       name: lt.tags?.name || "",
     })),
     toppertjeName: loc.users?.display_name,
-    toppertjeTitle: toppertjeTitleForRole(loc.users?.role, loc.users?.pronoun),
+    toppertjeTitle: flairFor({
+      role: loc.users?.role,
+      pronoun: loc.users?.pronoun,
+      points: loc.users?.points,
+    }),
     initialFavorited: favoritedSet.has(loc.id),
     currentUserId: currentUser?.id ?? null,
     favoritesCount: loc.favorites_count ?? 0,
