@@ -13,6 +13,11 @@ interface UserProfile {
   preferred_city_id?: string | null;
   avatar_url?: string | null;
   bio?: string | null;
+  notif_spot_approved?: boolean;
+  notif_milestones?: boolean;
+  notif_city_news?: boolean;
+  notif_digest?: boolean;
+  notif_reengage?: boolean;
 }
 
 /**

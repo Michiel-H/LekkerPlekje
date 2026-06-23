@@ -4,19 +4,39 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { DISPLAY_NAME_MAX, validateDisplayName } from "@/lib/displayName";
+import PushOptIn from "@/components/PushOptIn";
 
 type Pronoun = "vent" | "griet" | "neutraal";
+
+type NotifKey =
+  | "notif_spot_approved"
+  | "notif_milestones"
+  | "notif_city_news"
+  | "notif_digest"
+  | "notif_reengage";
+
+export type NotifPrefs = Record<NotifKey, boolean>;
+
+const NOTIF_OPTIONS: { key: NotifKey; label: string; hint: string }[] = [
+  { key: "notif_spot_approved", label: "Plekje goedgekeurd", hint: "Als je plekje live gaat." },
+  { key: "notif_milestones", label: "Mijlpalen & Toppertje", hint: "Populaire plekjes en je promotie." },
+  { key: "notif_city_news", label: "Nieuws uit je stad", hint: "Als een stad live gaat." },
+  { key: "notif_digest", label: "Wekelijkse digest", hint: "Nieuwe plekjes van de week." },
+  { key: "notif_reengage", label: "We missen je", hint: "Af en toe een vriendelijke herinnering." },
+];
 
 interface Props {
   userId: string;
   displayName: string;
   pronoun: Pronoun;
+  notifPrefs: NotifPrefs;
 }
 
 export default function SettingsForm({
   userId,
   displayName: initialName,
   pronoun: initialPronoun,
+  notifPrefs: initialNotifPrefs,
 }: Props) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState(initialName);
@@ -32,6 +52,25 @@ export default function SettingsForm({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteErr, setDeleteErr] = useState<string | null>(null);
+
+  const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(initialNotifPrefs);
+  const [notifMsg, setNotifMsg] = useState<string | null>(null);
+
+  async function toggleNotif(key: NotifKey) {
+    const next = { ...notifPrefs, [key]: !notifPrefs[key] };
+    setNotifPrefs(next);
+    setNotifMsg(null);
+    const res = await fetch("/api/account/notif-prefs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ [key]: next[key] }),
+    });
+    if (!res.ok) {
+      // Roll back on failure so the UI reflects what's actually stored.
+      setNotifPrefs(notifPrefs);
+      setNotifMsg("Opslaan mislukt. Probeer het opnieuw.");
+    }
+  }
 
   async function saveProfile() {
     setSavingProfile(true);
@@ -180,6 +219,54 @@ export default function SettingsForm({
         <p className="mt-3 text-xs text-espresso-light/70">
           Je profielfoto, bio en stad bewerk je direct op de profielpagina.
         </p>
+      </section>
+
+      {/* Notifications */}
+      <section className="rounded-2xl bg-white border border-espresso/8 p-6">
+        <h2 className="font-display text-lg font-semibold text-espresso mb-1">
+          Meldingen
+        </h2>
+        <p className="text-sm text-espresso-light mb-4">
+          Krijg een seintje op je telefoon bij belangrijke momenten.
+        </p>
+
+        <PushOptIn />
+
+        <div className="mt-5 divide-y divide-espresso/8 border-t border-espresso/8">
+          {NOTIF_OPTIONS.map((opt) => (
+            <label
+              key={opt.key}
+              className="flex cursor-pointer items-center justify-between gap-4 py-3"
+            >
+              <span>
+                <span className="block text-sm font-medium text-espresso">
+                  {opt.label}
+                </span>
+                <span className="block text-xs text-espresso-light/70">
+                  {opt.hint}
+                </span>
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={notifPrefs[opt.key]}
+                onClick={() => toggleNotif(opt.key)}
+                className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${
+                  notifPrefs[opt.key] ? "bg-frisgroen" : "bg-espresso/15"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                    notifPrefs[opt.key] ? "translate-x-[22px]" : "translate-x-0.5"
+                  }`}
+                />
+              </button>
+            </label>
+          ))}
+        </div>
+        {notifMsg && (
+          <p className="mt-3 text-xs text-koraal">{notifMsg}</p>
+        )}
       </section>
 
       {/* Password */}

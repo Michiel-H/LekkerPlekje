@@ -42,6 +42,13 @@ export default async function InstellingenPage() {
               userId={user.id}
               displayName={user.display_name}
               pronoun={user.pronoun}
+              notifPrefs={{
+                notif_spot_approved: user.notif_spot_approved ?? true,
+                notif_milestones: user.notif_milestones ?? true,
+                notif_city_news: user.notif_city_news ?? true,
+                notif_digest: user.notif_digest ?? true,
+                notif_reengage: user.notif_reengage ?? true,
+              }}
             />
           </div>
         </div>

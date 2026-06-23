@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import InstallButton from "@/components/InstallButton";
 
 function useInView(threshold = 0.2) {
   const ref = useRef<HTMLDivElement>(null);
@@ -389,6 +390,11 @@ export default function HoeHetWerktContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
               </svg>
             </Link>
+
+            {/* Renders only when the app is installable (hidden on desktop / once installed). */}
+            <div className="mt-6 flex justify-center">
+              <InstallButton />
+            </div>
           </div>
         </div>
     </main>

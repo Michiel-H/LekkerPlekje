@@ -17,6 +17,11 @@ export interface Database {
           approved_count: number;
           created_at: string;
           banned_at: string | null;
+          notif_spot_approved: boolean;
+          notif_milestones: boolean;
+          notif_city_news: boolean;
+          notif_digest: boolean;
+          notif_reengage: boolean;
         };
         Insert: {
           id: string;
@@ -25,6 +30,11 @@ export interface Database {
           role?: UserRole;
           approved_count?: number;
           banned_at?: string | null;
+          notif_spot_approved?: boolean;
+          notif_milestones?: boolean;
+          notif_city_news?: boolean;
+          notif_digest?: boolean;
+          notif_reengage?: boolean;
         };
         Update: Partial<{
           display_name: string;
@@ -32,6 +42,11 @@ export interface Database {
           role: UserRole;
           approved_count: number;
           banned_at: string | null;
+          notif_spot_approved: boolean;
+          notif_milestones: boolean;
+          notif_city_news: boolean;
+          notif_digest: boolean;
+          notif_reengage: boolean;
         }>;
       };
       cities: {
@@ -195,6 +210,72 @@ export interface Database {
           location_id: string;
         }>;
       };
+      push_subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          user_agent: string | null;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          user_agent?: string | null;
+        };
+        Update: Partial<{
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          user_agent: string | null;
+        }>;
+      };
+      notification_queue: {
+        Row: {
+          id: string;
+          user_id: string;
+          category: string;
+          payload: Record<string, unknown>;
+          dedupe_key: string | null;
+          status: string;
+          attempts: number;
+          created_at: string;
+          sent_at: string | null;
+        };
+        Insert: {
+          user_id: string;
+          category: string;
+          payload: Record<string, unknown>;
+          dedupe_key?: string | null;
+          status?: string;
+          attempts?: number;
+          sent_at?: string | null;
+        };
+        Update: Partial<{
+          status: string;
+          attempts: number;
+          sent_at: string | null;
+        }>;
+      };
+      location_milestones: {
+        Row: {
+          location_id: string;
+          milestone: number;
+          notified_at: string;
+        };
+        Insert: {
+          location_id: string;
+          milestone: number;
+          notified_at?: string;
+        };
+        Update: Partial<{
+          notified_at: string;
+        }>;
+      };
       admin_audit_log: {
         Row: {
           id: string;
@@ -221,7 +302,16 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      enqueue_weekly_digests: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+      enqueue_reengagement: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+    };
     Enums: {
       user_role: UserRole;
       pronoun: Pronoun;

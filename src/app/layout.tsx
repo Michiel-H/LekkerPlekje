@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
 import SentryBoot from "@/components/SentryBoot";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 
 // Nunito matches the rounded, friendly feel of the LekkerPlekje wordmark.
 // One font for the whole site — headings use the heavier weights.
@@ -27,6 +28,11 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   manifest: "/site.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "LekkerPlekje",
+    statusBarStyle: "default",
+  },
   openGraph: {
     title: "LekkerPlekje.com — Vind het lekkerste plekje voor elk moment",
     description:
@@ -43,6 +49,13 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#FF6B35",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover", // respect iPhone safe areas in standalone mode
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -55,6 +68,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <SentryBoot />
+        <ServiceWorkerRegistrar />
         {children}
       </body>
     </html>
