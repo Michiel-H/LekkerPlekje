@@ -98,7 +98,7 @@ export default function ResetPasswordForm() {
 
         {session === "ready" && done && (
           <div className="rounded-xl bg-frisgroen/10 border border-frisgroen/30 px-4 py-4 text-sm">
-            <p className="font-medium text-espresso">Gelukt! 🎉</p>
+            <p className="font-medium text-espresso">Gelukt!</p>
             <p className="mt-1 text-espresso-light">
               Je wachtwoord is gewijzigd. We sturen je door naar je profiel...
             </p>

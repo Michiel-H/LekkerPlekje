@@ -19,10 +19,10 @@ export default function RewardsHeader({
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="font-display text-xl font-bold text-espresso">
-            {lvl.current.emoji} {lvl.current.name}
+            {lvl.current.name}
           </p>
           <p className="text-sm text-espresso-light">
-            {points} punten · 🔥 {streak} dagen
+            {points} punten · {streak} dagen op rij
           </p>
         </div>
         <div className="text-right text-sm text-espresso-light">
@@ -40,7 +40,7 @@ export default function RewardsHeader({
             />
           </div>
           <p className="mt-1 text-xs text-espresso-light">
-            Nog {lvl.toNext} punten tot {lvl.next.name} {lvl.next.emoji}
+            Nog {lvl.toNext} punten tot {lvl.next.name}
           </p>
         </div>
       )}
@@ -53,7 +53,7 @@ export default function RewardsHeader({
               title={b.name}
               className="inline-flex items-center gap-1 rounded-full bg-groen/10 px-3 py-1 text-xs font-medium text-groen"
             >
-              {b.emoji} {b.name}
+              {b.name}
             </span>
           ))}
         </div>

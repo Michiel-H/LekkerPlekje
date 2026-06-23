@@ -54,7 +54,7 @@ export default function InstallButton({ className = "" }: { className?: string }
         onClick={handleClick}
         className={`inline-flex items-center gap-2 rounded-full bg-spritz px-5 py-2.5 font-semibold text-creme shadow-md transition hover:bg-spritz-hover ${className}`}
       >
-        <span aria-hidden>📲</span> Zet op je beginscherm
+        Zet op je beginscherm
       </button>
 
       {showIosSheet && (
@@ -68,9 +68,9 @@ export default function InstallButton({ className = "" }: { className?: string }
           >
             <h2 className="font-display text-lg font-bold">Toevoegen aan beginscherm</h2>
             <ol className="mt-3 space-y-2 text-sm text-espresso-light">
-              <li>1. Tik op het <strong>deel-icoon</strong> ⬆️ onderin Safari.</li>
+              <li>1. Tik op het <strong>deel-icoon</strong> onderin Safari.</li>
               <li>2. Kies <strong>&lsquo;Zet op beginscherm&rsquo;</strong>.</li>
-              <li>3. Tik op <strong>&lsquo;Voeg toe&rsquo;</strong> — klaar! 🎉</li>
+              <li>3. Tik op <strong>&lsquo;Voeg toe&rsquo;</strong> — klaar!</li>
             </ol>
             <button
               onClick={() => setShowIosSheet(false)}

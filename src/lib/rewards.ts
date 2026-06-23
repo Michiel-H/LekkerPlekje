@@ -2,11 +2,11 @@ import { isToppertjeLike, toppertjeTitle } from "@/lib/titleMap";
 
 // Keep these thresholds in sync with public.level_for_points in the DB.
 export const LEVELS = [
-  { min: 0, name: "Nieuwsgierig", emoji: "🌱" },
-  { min: 100, name: "Verkenner", emoji: "🧭" },
-  { min: 400, name: "Kenner", emoji: "⭐" },
-  { min: 750, name: "Local Hero", emoji: "🦸" },
-  { min: 2000, name: "Legende", emoji: "👑" },
+  { min: 0, name: "Nieuwsgierig" },
+  { min: 100, name: "Verkenner" },
+  { min: 400, name: "Kenner" },
+  { min: 750, name: "Local Hero" },
+  { min: 2000, name: "Legende" },
 ] as const;
 
 export function levelIndex(points: number): number {
@@ -41,6 +41,5 @@ export function flairFor(opts: {
   if (isToppertjeLike(opts.role)) return toppertjeTitle(opts.pronoun);
   const i = levelIndex(opts.points ?? 0);
   if (i === 0) return undefined;
-  const lvl = LEVELS[i];
-  return `${lvl.emoji} ${lvl.name}`;
+  return LEVELS[i].name;
 }

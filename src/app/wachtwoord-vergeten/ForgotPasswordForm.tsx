@@ -70,7 +70,7 @@ export default function ForgotPasswordForm() {
 
         {sent ? (
           <div className="rounded-xl bg-frisgroen/10 border border-frisgroen/30 px-4 py-4 text-sm">
-            <p className="font-medium text-espresso">Check je mail 📬</p>
+            <p className="font-medium text-espresso">Check je mail</p>
             <p className="mt-1 text-espresso-light">
               Als er een account bij <strong className="text-espresso">{sentTo}</strong>{" "}
               hoort, hebben we een mail gestuurd met een link om je wachtwoord opnieuw

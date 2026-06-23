@@ -14,8 +14,6 @@ interface Props {
   searchParams: Promise<{ periode?: string }>;
 }
 
-const MEDALS = ["🥇", "🥈", "🥉"];
-
 export default async function ToppersPage({ searchParams }: Props) {
   const { periode } = await searchParams;
   const period = periode === "all" ? "all" : "month";
@@ -38,7 +36,7 @@ export default async function ToppersPage({ searchParams }: Props) {
       <Header />
       <main className="flex-1 px-4 py-8 sm:py-12">
         <div className="mx-auto max-w-2xl">
-          <h1 className="font-display text-3xl font-bold text-espresso">Toppers 🏆</h1>
+          <h1 className="font-display text-3xl font-bold text-espresso">Toppers</h1>
           <p className="mt-1 text-sm text-espresso-light">
             De fanatiekste ontdekkers van LekkerPlekje.
           </p>
@@ -77,15 +75,13 @@ export default async function ToppersPage({ searchParams }: Props) {
                     className="flex items-center gap-4 rounded-2xl bg-white border border-espresso/8 px-4 py-3"
                   >
                     <span className="w-8 flex-shrink-0 text-center text-lg font-bold text-espresso-light">
-                      {MEDALS[i] ?? i + 1}
+                      {i + 1}
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-espresso">
                         {row.display_name}
                       </p>
-                      <p className="text-xs text-espresso-light">
-                        {lvl.emoji} {lvl.name}
-                      </p>
+                      <p className="text-xs text-espresso-light">{lvl.name}</p>
                     </div>
                     <span className="flex-shrink-0 font-display font-bold text-spritz">
                       {row.points} pt
