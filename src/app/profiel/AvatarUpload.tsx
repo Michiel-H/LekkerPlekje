@@ -40,19 +40,25 @@ export default function AvatarUpload({ userId, initialUrl, fallbackInitial }: Pr
       const supabase = createClient();
       // Strip EXIF (incl. GPS) before upload.
       const sanitized = await stripImageMetadata(file);
-      // Extension derived from MIME, not from the user-supplied filename
+      // Extension derived from MIME, not from the user-supplied filename.
+      // Unique filename (timestamp + random) means no conflict, so no upsert —
+      // upsert turns the upload into an INSERT...ON CONFLICT that the storage
+      // RLS rejects with a 400 (the plain insert the locations bucket uses works).
       const ext = safeImageExt(sanitized);
-      const path = `${userId}/${Date.now()}.${ext}`;
+      const path = `${userId}/${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2, 10)}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
-        .upload(path, sanitized, { upsert: true, contentType: sanitized.type });
+        .upload(path, sanitized, { contentType: sanitized.type });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
       const publicUrl = data.publicUrl;
-      await supabase
+      const { error: updErr } = await supabase
         .from("users")
         .update({ avatar_url: publicUrl } as never)
         .eq("id", userId);
+      if (updErr) throw updErr;
       setUrl(publicUrl);
       router.refresh();
     } catch (err) {
