@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
-import AdminSidebar from "./AdminSidebar";
+import { createClient } from "@/lib/supabase/server";
+import AdminShell from "./AdminShell";
 
 export default async function AdminLayout({
   children,
@@ -13,10 +14,22 @@ export default async function AdminLayout({
     redirect("/");
   }
 
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("locations")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending");
+
   return (
-    <div className="min-h-screen bg-creme flex">
-      <AdminSidebar role={user.role} />
-      <main className="flex-1 p-6 lg:p-8 overflow-auto">{children}</main>
-    </div>
+    <AdminShell
+      user={{
+        display_name: user.display_name,
+        role: user.role,
+        avatar_url: user.avatar_url ?? null,
+      }}
+      initialPendingCount={count ?? 0}
+    >
+      {children}
+    </AdminShell>
   );
 }

@@ -19,12 +19,11 @@ export default async function BeheerdersPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-bold text-espresso">Beheerders & Rechten</h1>
-      <p className="mt-1 text-sm text-espresso-light">
+      <p className="text-sm text-espresso-light">
         Alleen jij als superadmin kunt admins aanmaken of verwijderen.
       </p>
 
-      <div className="mt-8">
+      <div className="mt-6">
         {users && users.length > 0 ? (
           <BeheerderTable users={users} />
         ) : (

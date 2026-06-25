@@ -1,21 +1,20 @@
-import { getCurrentUser } from "@/lib/auth";
+import { Suspense } from "react";
+import { requireAdminPage } from "@/lib/adminGuard";
 import CommunityTable from "./CommunityTable";
 
 export default async function CommunityPage() {
-  const currentUser = await getCurrentUser();
+  const currentUser = await requireAdminPage();
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-bold text-espresso">Community</h1>
-      <p className="mt-1 text-sm text-espresso-light">
-        Beheer gebruikers. Promoveer actieve gebruikers tot Toppertje of demoveer als dat nodig is.
+      <p className="text-sm text-espresso-light">
+        Beheer gebruikers. Klik een rij voor het volledige profiel, of promoveer/verban direct.
       </p>
 
-      <div className="mt-8">
-        <CommunityTable
-          currentUserRole={currentUser?.role ?? "admin"}
-          currentUserId={currentUser?.id ?? ""}
-        />
+      <div className="mt-6">
+        <Suspense fallback={<div className="text-sm text-espresso-light">Laden...</div>}>
+          <CommunityTable currentUserRole={currentUser.role} currentUserId={currentUser.id} />
+        </Suspense>
       </div>
     </div>
   );
